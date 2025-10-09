@@ -3,7 +3,9 @@
 
 ## Executive Summary
 
-This document outlines the architecture for the "Living with the Rebbe" admin tool - a scraping and publishing application that runs as an iframe within ChabadUniverse. The tool enables channel administrators to scrape archived newsletters and publish them to community channels.
+This document outlines the architecture for the "Living with the Rebbe" admin tool - a scraping and publishing application that runs as an iframe within ChabadUniverse. The tool enables channel administrators to scrape and publish newsletters to community channels.
+
+**MVP Scope**: Process 3 most recent newsletters + weekly updates (not 400 historical newsletters)
 
 ## System Overview
 
@@ -75,20 +77,24 @@ Archive Page → Newsletter List → Individual Newsletters
 
 ### 3. Data Flow
 
-**With MongoDB state management**:
+**MVP Implementation (3 + weekly newsletters)**:
 
 1. **Initialize Session**: Create processing session in DB
 2. **Fetch Archive**: GET from S3
-3. **Parse Links**: Extract ~400 newsletter URLs
-4. **Process Newsletter**:
+3. **Parse Links**: Extract 3 most recent newsletter URLs
+4. **Process Newsletter (Without API)**:
    - Check DB for existing record (duplicate detection)
    - Fetch HTML from merkos302.com
-   - Extract media URLs
-   - Upload to CMS (save mappings to DB)
-   - Rewrite URLs using saved mappings
-   - Post to channel
-   - Update DB with success status and post ID
-5. **Recovery**: Can resume from last successful operation
+   - Extract media URLs (all owned, no auth required)
+   - Download and cache media locally
+   - Save newsletter as "ready_to_publish"
+   - Send email notification to retzion@merkos302.com
+   - Export to JSON for manual posting
+5. **Weekly Check**: Automated or manual check for new newsletter
+6. **Future (With API)**:
+   - Upload cached media to CMS
+   - Rewrite URLs using CMS mappings
+   - Post to channel automatically
 
 ## Project Structure
 

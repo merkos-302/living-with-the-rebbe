@@ -3,6 +3,8 @@
 
 This guide combines the complete workflow and implementation details for developing the Living with the Rebbe admin tool.
 
+**MVP Scope Update**: The scope has been reduced from ~400 newsletters to just 3 recent newsletters plus weekly updates. This dramatically simplifies development - build everything with a mock API first, integrate real API when available.
+
 ## Table of Contents
 1. [Project Setup](#project-setup)
 2. [Development Workflow](#development-workflow)
@@ -93,21 +95,20 @@ export default connectDB;
 
 ## Development Workflow
 
-### Complete Processing Pipeline
+### MVP Processing Pipeline (3 + Weekly)
 
 ```mermaid
 graph TD
-    A[Admin Authentication] --> B[Create Processing Session]
-    B --> C[Fetch Archive]
-    C --> D[Parse Newsletter Links]
-    D --> E[Check Database for Duplicates]
-    E --> F[Process Each Newsletter]
-    F --> G[Extract Media]
-    G --> H[Upload to CMS]
-    H --> I[Rewrite URLs]
-    I --> J[Post to Channel]
-    J --> K[Update Database]
-    K --> L[Session Complete]
+    A[Admin Authentication] --> B[Fetch 3 Recent Newsletters]
+    B --> C[Check Database for Duplicates]
+    C --> D[Process Each Newsletter]
+    D --> E[Extract Media - No Auth Required]
+    E --> F[Cache Media Locally]
+    F --> G[Save as Ready to Publish]
+    G --> H[Email retzion@merkos302.com]
+    H --> I[Export JSON for Manual Post]
+    I --> J[Weekly Check for New]
+    J --> K[When API Ready: Auto-Publish]
 ```
 
 ### Phase 1: Authentication & Session
@@ -131,14 +132,15 @@ const session = await ProcessingSession.create({
 });
 ```
 
-### Phase 2: Archive Discovery
+### Phase 2: Archive Discovery (MVP - 3 Recent Only)
 
 ```typescript
-// Fetch and parse archive
+// Fetch and parse archive - GET ONLY 3 MOST RECENT
 const year = "5785";
 const archiveUrl = `${ARCHIVE_BASE_URL}/Chazak/${year}/LivingWithTheRebbe.html`;
 const archiveHtml = await fetch(archiveUrl);
-const newsletters = parseArchive(archiveHtml);
+const allNewsletters = parseArchive(archiveHtml);
+const newsletters = allNewsletters.slice(-3); // Last 3 only for MVP
 
 // Check for already processed
 const processedSlugs = await Newsletter.find({
@@ -227,73 +229,37 @@ try {
 }
 ```
 
-## Implementation Timeline
+## Implementation Timeline (MVP - 5 Days)
 
-### Week 1: Foundation
-**Day 1-2: Project Setup**
-- Initialize Next.js with TypeScript
+### Day 1: Project Setup & Mock API
+- Initialize Next.js with TypeScript (App Router)
 - Set up MongoDB connection
-- Configure Vercel deployment
-- Create environment variables
+- Create mock API server
+- Configure environment variables
 
-**Day 3-4: Authentication**
-- Integrate Valu API
-- Create auth hooks
-- Build auth guard components
-- Test iframe detection using Valu Social Dev Tool
-
-**Day 5: Database & UI**
-- Create Mongoose models
-- Build admin dashboard
-- Implement loading states
-
-### Week 2: Scraping Pipeline
-**Day 6-7: Archive Parser**
-- Create archive fetcher
+### Day 2: Scraping for 3 Newsletters
+- Create archive fetcher (3 recent only)
 - Implement HTML parser
-- Extract newsletter metadata
+- Extract media URLs (all owned, no auth)
+- Database models
 
-**Day 8-9: Newsletter Scraper**
-- Build content extractor
-- Parse media URLs
-- Handle Hebrew/RTL content
+### Day 3: Media Processing & Email
+- Download and cache media locally
+- Configure email notifications to retzion@merkos302.com
+- HTML preservation (exact replica)
+- No URL rewriting needed yet
 
-**Day 10: Media Processing**
-- Identify media types
-- Create URL validator
-- Build extraction logic
+### Day 4: Admin UI
+- Build simple dashboard
+- Newsletter list (3 items)
+- Process button
+- Export JSON button
 
-### Week 3: CMS Integration
-**Day 11-12: CMS Client**
-- Create upload functions
-- Add retry logic
-- Handle API authentication
-
-**Day 13: URL Rewriting**
-- Build URL mapper
-- Implement replacer
-- Test edge cases
-
-**Day 14-15: Publishing**
-- Create channel poster
-- Add tag management
-- Handle errors
-
-### Week 4: Polish & Testing
-**Day 16-17: Admin Interface**
-- Year selector UI
-- Newsletter list view
-- Progress indicators
-
-**Day 18: Preview System**
-- HTML preview
-- Media verification
-- Edit capabilities
-
-**Day 19-20: Testing**
-- Unit tests
-- Integration tests
-- Performance optimization
+### Day 5: Testing & Deployment
+- Test with real newsletters
+- Deploy to Vercel
+- Configure Valu Social iframe
+- Documentation complete
 
 ## Core Components
 

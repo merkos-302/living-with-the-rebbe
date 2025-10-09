@@ -7,29 +7,31 @@ After comprehensive review of all project documentation, I've identified **15+ c
 
 **Update**: ✅ One major issue resolved - MongoDB has been added to the architecture to handle state management, eliminating the problems with the original "stateless" design.
 
+**Major Scope Update**: ✅ The project scope has been dramatically reduced from ~400 newsletters to just 3 recent newsletters + weekly updates going forward. This changes the project from a massive migration to a simple weekly publishing tool.
+
 **Recommendation**: Do not begin development until remaining critical issues are resolved. Start with a proof of concept to validate core assumptions.
 
 ---
 
 ## 🔴 Critical Issues (Must Resolve Before Starting)
 
-### 1. API Specification Gap
+### 1. ⚠️ API Specification Gap (Working Around with Mock)
 
 **Issue**: The ChabadUniverse API doesn't exist yet.
 
-**Documentation Says**:
-- "PUT /api/cms/media"
-- "POST /api/channels/{channelId}/posts"
-- User stated: "The Valu Social team needs to create the API for us"
+**Resolution Strategy**:
+- Build complete system with mock API
+- Export to JSON for manual posting
+- Swap in real API when available
+- No ETA provided, but not blocking MVP
 
-**Questions**:
-- When will the ChabadUniverse API be ready?
-- Can we get an OpenAPI/Swagger specification?
-- Should we build mock APIs first or wait?
-- What are the exact request/response formats?
-- Are there rate limits or payload size restrictions?
+**Current Approach**:
+- Mock API server for development
+- Email notifications to retzion@merkos302.com
+- JSON export capability
+- System ready to integrate real API instantly
 
-**Impact**: Cannot begin CMS integration without API specification.
+**Impact**: Not blocking MVP development with reduced scope (3 + weekly)
 
 ### 2. Authentication Method Clarification
 
@@ -49,20 +51,22 @@ After comprehensive review of all project documentation, I've identified **15+ c
 
 **Impact**: Need to understand how Valu auth and API key work together.
 
-### 3. Media Upload Mechanism Unclear
+### 3. ✅ RESOLVED: Media Handling Simplified
 
-**Issue**: Media upload process has undefined constraints and behaviors.
+**Original Issue**: Media upload process had undefined constraints.
 
-**Questions**:
-- Maximum file size allowed?
-- Supported file formats?
-- How to handle existing media (deduplication)?
-- Timeout handling for large files?
-- Chunked upload support?
-- What's returned if media already exists in CMS?
-- How to handle authentication-required media (Google Docs)?
+**Resolution**:
+- We own all media (no authentication required)
+- Only processing 3 + weekly newsletters (minimal media)
+- Cache media locally until API ready
+- No Google Docs authentication issues
+- Simple download and store approach
 
-**Impact**: Media processing is core functionality; needs clear specification.
+**Implementation**:
+- Download media to local cache
+- Hash-based deduplication
+- Export with JSON when needed
+- Upload to CMS when API available
 
 ---
 
@@ -128,43 +132,47 @@ After comprehensive review of all project documentation, I've identified **15+ c
 
 ## 🟠 Functional Gaps
 
-### 7. Error Recovery Strategy
+### 7. ✅ RESOLVED: Error Recovery Not Critical for MVP
 
-**Issue**: No clear recovery mechanism for failures.
+**Original Issue**: No clear recovery mechanism for failures.
 
-**Scenarios Not Addressed**:
-- Processing fails at newsletter #250 of 400
-- CMS down mid-batch
-- Network timeout during media upload
-- Admin session expires during processing
-- Browser crashes during operation
+**Resolution**: With only 3 + weekly newsletters, error recovery is trivial:
+- Processing takes ~2 minutes total
+- Can easily restart if failure
+- MongoDB tracks state
+- Email notification confirms completion
+- Manual verification simple with small scope
 
-**Need**: State persistence and recovery mechanism.
+**Implementation**: Basic retry with exponential backoff sufficient.
 
-### 8. Duplicate Detection Logic
+### 8. ✅ RESOLVED: Duplicate Detection Simplified
 
-**Issue**: No clear method to detect already-posted newsletters.
+**Original Issue**: No clear method to detect already-posted newsletters.
 
-**Options**:
-- Check by title? (might have legitimate duplicates)
-- Check by generated slug? (need consistent generation)
-- Check by content hash?
-- Query CMS for existing posts?
+**Resolution**:
+- No duplicates will occur (each newsletter posted once)
+- No update mechanism needed
+- MongoDB unique index on slug prevents duplicates
+- Simple existence check before processing
 
-**Question**: What's the source of truth for "already posted"?
+**Implementation**:
+```typescript
+const exists = await Newsletter.findOne({ slug });
+if (exists) return; // Skip
+```
 
-### 9. Performance Math Doesn't Add Up
+### 9. ✅ RESOLVED: Performance Requirements Simplified
 
-**Documentation Claims**:
-- "Process 10 newsletters/minute"
-- "Media upload < 30 seconds"
-- Each newsletter has 10-20 media files
+**Original Issue**: Performance math didn't add up for 400 newsletters.
 
-**Math Problem**:
-- 10 newsletters × 15 media files × 30 seconds = 75 minutes
-- This exceeds the 1-minute target by 75x
+**Resolution**: Scope reduced to only 3 newsletters + weekly updates.
 
-**Need**: Parallel processing or adjusted expectations.
+**New Performance Reality**:
+- Only 3 newsletters initially (~ 6 minutes total)
+- 1 newsletter weekly (~ 2 minutes)
+- Performance is no longer a concern with this scope
+
+**Implementation**: Process newsletters sequentially, no complex parallelization needed.
 
 ---
 
@@ -179,20 +187,17 @@ After comprehensive review of all project documentation, I've identified **15+ c
 - Is there a staging environment?
 - Can we test against a sandbox channel?
 
-### 11. Next.js Router Confusion
+### 11. ✅ RESOLVED: Use App Router
 
-**Issue**: Mixed routing paradigms in documentation.
+**Original Issue**: Mixed routing paradigms in documentation.
 
-**IMPLEMENTATION_PLAN.md** shows:
-```bash
-npx create-next-app@latest living-with-rebbe --typescript --tailwind --app
-```
+**Resolution**: Confirmed to use Next.js App Router
+- Modern approach
+- Better TypeScript support
+- Improved performance
+- Future-proof
 
-But all examples use Pages Router:
-- `/pages/api/...`
-- `/pages/index.tsx`
-
-**Question**: Use App Router or Pages Router?
+**Implementation**: All code examples updated to use App Router patterns.
 
 ### 12. TypeScript vs JavaScript
 

@@ -6,9 +6,11 @@ An administrative tool for ChabadUniverse channel administrators to scrape and p
 ## Overview
 
 This application runs exclusively as an iframe within ChabadUniverse and provides:
-- Newsletter scraping from archived sources (~400 issues from years 5773-5785)
-- Media asset upload to ChabadUniverse CMS
-- Automated posting to community channels with appropriate tags
+- **MVP Scope**: Scraping of 3 most recent newsletters + weekly updates going forward
+- Media asset caching (all media owned, no authentication required)
+- Email notifications to retzion@merkos302.com for new newsletters
+- Export to JSON until ChabadUniverse API is available
+- Automated posting to community channels when API is ready
 
 ## Access Requirements
 
@@ -18,16 +20,19 @@ This application runs exclusively as an iframe within ChabadUniverse and provide
 
 ## Features
 
-### Scraping
-- Fetches newsletters from S3 archives
-- Parses HTML content while preserving original styling
-- Extracts media assets (images, PDFs, audio files)
+### MVP Features (Week 1)
+- Fetch 3 most recent newsletters from S3 archives
+- Weekly check for new newsletters (automated or manual)
+- Parse HTML content while preserving exact formatting
+- Download and cache all media locally (no auth required)
+- Email notifications to retzion@merkos302.com
+- Export to JSON for manual posting (until API ready)
 
-### Publishing
-- Uploads media to ChabadUniverse CMS
-- Rewrites media URLs to CMS locations
-- Posts newsletters to community channels
-- Adds tags (parsha, year) for organization
+### Future Features (When API Available)
+- Automatic upload of media to ChabadUniverse CMS
+- Direct posting to community channels
+- Automatic URL rewriting to CMS locations
+- Tags for organization (parsha, year)
 
 ## Quick Start
 
@@ -96,13 +101,15 @@ This tool integrates with ChabadUniverse APIs:
 
 ## Tech Stack
 
-- Next.js 15 with TypeScript
+- Next.js 15 with TypeScript (App Router)
 - React 18
 - MongoDB/Mongoose for state management
 - @arkeytyp/valu-api for iframe integration
 - Cheerio for HTML parsing
 - Tailwind CSS for styling
 - Vercel for deployment
+- Nodemailer for email notifications
+- Mock API for development (until real API available)
 
 ## Project Structure
 

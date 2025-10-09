@@ -1,0 +1,56 @@
+{
+  "name": "living-with-the-rebbe",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"next dev\" \"npm run mock-api\"",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "mock-api": "node mock-api/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "scrape:recent": "node scripts/scrape-recent.js",
+    "scrape:weekly": "node scripts/weekly-check.js",
+    "export:json": "node scripts/export-json.js"
+  },
+  "dependencies": {
+    "@arkeytyp/valu-api": "^1.0.0",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "framer-motion": "^10.16.16",
+    "lucide-react": "^0.294.0",
+    "mongoose": "^8.0.3",
+    "next": "15.0.0",
+    "nodemailer": "^6.9.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^2.2.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.35",
+    "@types/node": "^20.10.5",
+    "@types/nodemailer": "^6.4.14",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "15.0.0",
+    "jest": "^29.7.0",
+    "json-server": "^0.17.4",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

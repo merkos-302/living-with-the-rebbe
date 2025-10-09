@@ -7,11 +7,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is an admin tool for ChabadUniverse channel administrators to scrape and publish "Living with the Rebbe" newsletters. The application:
 - Runs exclusively as an iframe within ChabadUniverse/Valu Social
-- Scrapes ~400 archived newsletters from S3 (years 5773-5785)
-- Uploads media assets to ChabadUniverse CMS
-- Posts newsletters to community channels with appropriate tags
-- Requires admin authentication through Valu/ChabadUniverse
+- **MVP Scope**: Scrapes 3 most recent newsletters + weekly updates (NOT ~400)
+- Downloads and caches media locally (we own all media, no auth required)
+- Sends email notifications to retzion@merkos302.com when ready
+- Exports to JSON for manual posting until API available
+- Will upload media and auto-post when ChabadUniverse API is ready
 - Preserves exact HTML styling from original newsletters
+- Uses Next.js App Router (not Pages Router)
 
 ## Architecture (Based on Universe-Portal)
 
@@ -32,12 +34,13 @@ This is an admin tool for ChabadUniverse channel administrators to scrape and pu
 - **Channel API** for newsletter posting (POST endpoints)
 - **Admin-only access** via Valu authentication
 
-### Content Processing Pipeline
-1. **Archive Scraper**: Parses archive page for newsletter links
+### Content Processing Pipeline (MVP - 3 + Weekly)
+1. **Archive Scraper**: Fetches 3 most recent newsletters
 2. **Newsletter Parser**: Extracts HTML and media URLs
-3. **Media Uploader**: Uploads assets to ChabadUniverse CMS
-4. **URL Rewriter**: Replaces media URLs with CMS URLs
-5. **Channel Publisher**: Posts to community channel with tags
+3. **Media Downloader**: Caches media locally (no auth required)
+4. **Email Notifier**: Sends to retzion@merkos302.com
+5. **JSON Export**: Manual posting until API ready
+6. **Future**: Auto-upload and publish when API available
 
 ## Common Commands
 
