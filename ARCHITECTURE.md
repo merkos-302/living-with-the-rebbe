@@ -31,6 +31,7 @@ This document outlines the architecture for the "Living with the Rebbe" admin to
 
 ### Integration Layer
 - **@arkeytyp/valu-api** - Iframe communication and authentication
+- **Valu Social Dev Tool** - Enables localhost testing within production iframe
 - **Cheerio** - HTML parsing for newsletter scraping
 - **Axios** - HTTP client for API calls
 
@@ -269,6 +270,10 @@ const ProcessingSessionSchema = new Schema({
 3. **CORS**: Configured for ChabadUniverse origin only
 4. **Rate Limiting**: Prevent overwhelming source servers
 5. **Input Validation**: Sanitize HTML content
+6. **Development Testing**: Valu Social Dev Tool provides secure localhost-to-production iframe testing
+   - Real authentication flow (no mocking needed)
+   - Third-party cookie handling in actual context
+   - Production security policies applied during development
 
 ## Performance Optimization
 

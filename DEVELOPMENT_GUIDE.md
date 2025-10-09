@@ -20,6 +20,7 @@ This guide combines the complete workflow and implementation details for develop
 - MongoDB (local or Atlas account)
 - Vercel CLI (for deployment)
 - Admin API key for ChabadUniverse
+- Valu Social Dev Tool access (for iframe testing)
 
 ### Initial Setup
 
@@ -35,6 +36,30 @@ npm install @arkeytyp/valu-api cheerio axios mongoose
 npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu
 npm install lucide-react framer-motion
 ```
+
+### Local Development with Valu Social
+
+Valu Social provides a development tool that allows your localhost application to run within their production iframe environment:
+
+1. **Configure localhost in Valu Social**:
+   - Access the Valu Social dev tool configuration
+   - Add your localhost URL (typically `http://localhost:3000`)
+   - This enables testing with real authentication and iframe context
+
+2. **No mocking required**:
+   - Test against actual production parent window
+   - Real authentication flow
+   - Actual third-party cookie behavior
+
+3. **Development workflow**:
+   ```bash
+   # Start local dev server
+   npm run dev
+
+   # Open ChabadUniverse/Valu Social
+   # Navigate to your app within their iframe
+   # Your localhost app will load with full production context
+   ```
 
 ### Environment Configuration
 
@@ -215,7 +240,7 @@ try {
 - Integrate Valu API
 - Create auth hooks
 - Build auth guard components
-- Test iframe detection
+- Test iframe detection using Valu Social Dev Tool
 
 **Day 5: Database & UI**
 - Create Mongoose models

@@ -246,6 +246,23 @@ LOG_LEVEL=warn
 
 ## Iframe Integration
 
+### Development Testing
+Valu Social provides a development tool that enables localhost testing within their production iframe:
+
+```bash
+# Local development testing
+1. Start your dev server: npm run dev
+2. Configure localhost URL in Valu Social Dev Tool
+3. Access your app through ChabadUniverse/Valu Social
+4. Test with real authentication and iframe context
+```
+
+**Benefits**:
+- No mock authentication needed
+- Real third-party cookie behavior
+- Production security policies during development
+- Actual parent window communication
+
 ### 1. ChabadUniverse Configuration
 ```javascript
 // Configuration on ChabadUniverse side
@@ -260,6 +277,10 @@ LOG_LEVEL=warn
         "width": "100%",
         "height": "100vh",
         "sandbox": "allow-same-origin allow-scripts allow-forms allow-popups"
+      },
+      "development": {
+        "enabled": true,
+        "localUrl": "http://localhost:3000"
       }
     }
   }
