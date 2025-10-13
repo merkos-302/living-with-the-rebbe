@@ -10,18 +10,65 @@ This document outlines the architecture for the "Living with the Rebbe" admin to
 ## System Overview
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                 ChabadUniverse                       │
-│  ┌─────────────────────────────────────────────┐    │
-│  │         Living with Rebbe (iframe)          │    │
-│  │                                              │    │
-│  │  [Admin Dashboard] → [Scrape] → [Publish]   │    │
-│  │         ↓               ↓           ↓       │    │
-│  │    [Valu Auth]    [S3 Archive]  [CMS API]   │    │
-│  └─────────────────────────────────────────────┘    │
-│                                                      │
-│  [Community Channel] ← [Newsletter Posts w/ Media]  │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                   ChabadUniverse Platform                │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │      Living with the Rebbe Admin Tool (iframe)     │  │
+│  │                                                    │  │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │  │
+│  │  │  Admin   │→ │  Scrape  │→ │   Process    │    │  │
+│  │  │Dashboard │  │  Archive │  │  Newsletter  │    │  │
+│  │  └──────────┘  └──────────┘  └──────────────┘    │  │
+│  │       ↓             ↓               ↓             │  │
+│  │  [Valu Auth]   [S3 Archive]   [Local Cache]       │  │
+│  └───────────────────────────────────────────────────┘  │
+│                           ↓                              │
+│              [Future: Auto-publish to Channel]           │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Data Flow Diagrams
+
+### MVP Newsletter Processing Flow
+```
+   S3 Archive                    Local System                    Output
+       │                              │                            │
+       ▼                              ▼                            ▼
+┌─────────────┐            ┌───────────────────┐         ┌──────────────┐
+│   Archive   │  fetch     │   Newsletter      │ export  │  JSON File   │
+│    HTML     │──────────▶ │    Scraper       │────────▶│    + Email   │
+└─────────────┘            └───────────────────┘         └──────────────┘
+                                     │
+                                     ▼
+                           ┌───────────────────┐
+                           │   Media Cache     │
+                           │  (Local Storage)  │
+                           └───────────────────┘
+                                     │
+                                     ▼
+                           ┌───────────────────┐
+                           │    MongoDB        │
+                           │  (State Tracking) │
+                           └───────────────────┘
+```
+
+### Future API Integration Flow
+```
+When ChabadUniverse API Available:
+
+   JSON Export                     CMS API                  Channel
+       │                              │                        │
+       ▼                              ▼                        ▼
+┌─────────────┐            ┌───────────────────┐    ┌──────────────┐
+│  Processed  │  upload    │   Media Upload    │    │  Newsletter  │
+│ Newsletter  │──────────▶ │   (PUT /media)    │───▶│    Post     │
+└─────────────┘            └───────────────────┘    └──────────────┘
+                                     │
+                                     ▼
+                           ┌───────────────────┐
+                           │  Channel Publish  │
+                           │ (POST /channels)  │
+                           └───────────────────┘
 ```
 
 ## Tech Stack
@@ -59,42 +106,43 @@ if (!user?.roles?.includes('channel_admin')) {
 }
 ```
 
-### 2. Scraping Pipeline
+### 2. Processing Pipeline Stages
 
 ```
-Archive Page → Newsletter List → Individual Newsletters
-     ↓              ↓                    ↓
-  Parse HTML    Extract URLs      Extract Content
-                                         ↓
-                                   Media Discovery
-                                         ↓
-                                    CMS Upload
-                                         ↓
-                                   URL Rewriting
-                                         ↓
-                                  Channel Posting
+┌────────────┐     ┌────────────┐     ┌────────────┐     ┌────────────┐
+│   FETCH    │────▶│   PARSE    │────▶│   CACHE    │────▶│   EXPORT   │
+│            │     │            │     │            │     │            │
+│ S3 Archive │     │Extract HTML│     │Download    │     │JSON Output │
+│            │     │   & Media  │     │   Media    │     │   + Email  │
+└────────────┘     └────────────┘     └────────────┘     └────────────┘
+      │                   │                  │                  │
+      ▼                   ▼                  ▼                  ▼
+  [MongoDB]          [MongoDB]          [MongoDB]          [MongoDB]
+   (Track)            (Store)           (Update)           (Complete)
 ```
 
-### 3. Data Flow
+### 3. Component Interaction
 
-**MVP Implementation (3 + weekly newsletters)**:
-
-1. **Initialize Session**: Create processing session in DB
-2. **Fetch Archive**: GET from S3
-3. **Parse Links**: Extract 3 most recent newsletter URLs
-4. **Process Newsletter (Without API)**:
-   - Check DB for existing record (duplicate detection)
-   - Fetch HTML from merkos302.com
-   - Extract media URLs (all owned, no auth required)
-   - Download and cache media locally
-   - Save newsletter as "ready_to_publish"
-   - Send email notification to retzion@merkos302.com
-   - Export to JSON for manual posting
-5. **Weekly Check**: Automated or manual check for new newsletter
-6. **Future (With API)**:
-   - Upload cached media to CMS
-   - Rewrite URLs using CMS mappings
-   - Post to channel automatically
+```
+    Frontend (Next.js)              Backend (API Routes)           External
+         │                                  │                         │
+    ┌────────┐                       ┌──────────┐              ┌──────────┐
+    │ Admin  │──────Request────────▶│  Scrape  │────Fetch────▶│    S3    │
+    │   UI   │                       │   API    │               │ Archive  │
+    └────────┘                       └──────────┘              └──────────┘
+         ▲                                  │
+         │                                  ▼
+    Status Update                    ┌──────────┐
+         │                           │ Process  │
+         │                           │   API    │
+         │                           └──────────┘
+         │                                  │
+         │                                  ▼
+    ┌────────┐                       ┌──────────┐              ┌──────────┐
+    │Progress│◀──────Update─────────│ MongoDB  │              │  Email   │
+    │Display │                       │   Store  │──Notify────▶│  Service │
+    └────────┘                       └──────────┘              └──────────┘
+```
 
 ## Project Structure
 
