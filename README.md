@@ -7,7 +7,7 @@ Administrative tool for ChabadUniverse to scrape and publish "Living with the Re
 
 **MVP Scope**: Process 3 recent newsletters + weekly updates
 **Environment**: Runs as iframe within ChabadUniverse only
-**Status**: Ready for development with mock API
+**Status**: Planning/Documentation Phase - Ready for implementation
 
 ## Quick Links
 
@@ -19,13 +19,13 @@ Administrative tool for ChabadUniverse to scrape and publish "Living with the Re
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System design with diagrams |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Production deployment guide |
 
-## Core Features
+## Core Features (Planned)
 
-- ✅ Scrape 3 recent newsletters from S3 archive
-- ✅ Weekly check for new newsletters
-- ✅ Cache all media locally (we own all assets)
-- ✅ Email notification to retzion@merkos302.com
-- ✅ Export to JSON (until API available)
+- 📋 Scrape 3 recent newsletters from S3 archive
+- 📋 Weekly check for new newsletters
+- 📋 Cache all media locally (we own all assets)
+- 📋 Email notification to retzion@merkos302.com
+- 📋 Export to JSON (until API available)
 - 🔜 Auto-publish when ChabadUniverse API ready
 
 ## Installation
@@ -40,9 +40,19 @@ npm install
 cp .env.example .env.local
 # Edit .env.local with your values
 
-# Start development
+# Start development (once implemented)
 npm run dev
 ```
+
+## Implementation Prerequisites
+
+Before starting development, you'll need to create:
+- `tsconfig.json` - TypeScript configuration
+- `next.config.js` - Next.js configuration
+- `tailwind.config.js` - Tailwind CSS setup
+- `postcss.config.js` - PostCSS configuration
+- `jest.config.js` - Testing configuration
+- `.eslintrc.json` - Linting rules
 
 ## Environment Variables
 
@@ -64,9 +74,11 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 
 - ✅ Architecture defined
 - ✅ Scope reduced to MVP (3 + weekly)
-- ✅ Mock API approach ready
+- ✅ Mock API approach designed
+- ✅ Comprehensive documentation complete
+- ✅ Claude Code tooling configured
 - 🔄 Awaiting ChabadUniverse API
-- 📅 Development ready to start
+- 📅 Ready for implementation
 
 ---
 

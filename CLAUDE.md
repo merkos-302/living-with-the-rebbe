@@ -5,6 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
+**Current Status**: Planning/Documentation Phase (No code implemented yet)
+
 This is an admin tool for ChabadUniverse channel administrators to scrape and publish "Living with the Rebbe" newsletters. The application:
 - Runs exclusively as an iframe within ChabadUniverse/Valu Social
 - **MVP Scope**: Scrapes 3 most recent newsletters + weekly updates (NOT ~400)
@@ -13,7 +15,7 @@ This is an admin tool for ChabadUniverse channel administrators to scrape and pu
 - Exports to JSON for manual posting until API available
 - Will upload media and auto-post when ChabadUniverse API is ready
 - Preserves exact HTML styling from original newsletters
-- Uses Next.js App Router (not Pages Router)
+- Uses Next.js 15 App Router (not Pages Router)
 
 ## Architecture (Based on Universe-Portal)
 
@@ -70,11 +72,11 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 
 ## Workflow
 
-### Scraping Process
+### Scraping Process (MVP)
 1. Admin authenticates via Valu/ChabadUniverse
 2. Creates new processing session in database
 3. Fetches archive from `https://merkos-living.s3.us-west-2.amazonaws.com/Chazak/[year]/LivingWithTheRebbe.html`
-4. Parses ~400 newsletter links (merkos302.com pattern)
+4. Parses and selects 3 most recent newsletter links (merkos302.com pattern)
 5. For each newsletter:
    - Checks database for existing processing record
    - If already posted, skips to next
@@ -101,11 +103,11 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 ## Development Patterns (From Universe-Portal)
 
 ### Provider Hierarchy
-Follow the same provider pattern as universe-portal in `_app.tsx`:
+Follow the same provider pattern as universe-portal in root layout:
 ```typescript
 <ValuApiProvider>
   <AuthProvider>
-    <Component />
+    {children}
   </AuthProvider>
 </ValuApiProvider>
 ```
@@ -115,14 +117,17 @@ Follow the same provider pattern as universe-portal in `_app.tsx`:
 - Admin permission verification
 - CMS API key management
 
-### File Organization
-- `/pages` - Admin dashboard and API routes
+### File Organization (Next.js 15 App Router)
+- `/app` - App Router structure
+  - `/app/admin` - Admin dashboard pages
+  - `/app/api` - API route handlers
 - `/components/admin` - Scraping and publishing UI
 - `/lib/scraper` - Scraping logic
 - `/lib/cms` - CMS integration
 - `/lib/db` - Database connection and queries
 - `/models` - Mongoose schemas (Newsletter, ProcessingSession)
 - `/hooks` - Custom React hooks
+- `/scripts` - Node.js CLI scripts for scraping operations
 
 ## Related Projects
 - **Universe-Portal** (`../universe-portal`): Reference architecture
@@ -133,3 +138,47 @@ Follow the same provider pattern as universe-portal in `_app.tsx`:
 - Integration tests for CMS upload
 - Mock Valu authentication for development
 - Test in actual ChabadUniverse iframe
+
+## Project Implementation Status
+
+### ✅ Completed
+- Comprehensive documentation and specifications
+- Architecture design and database schemas
+- API contract definitions
+- Development workflow documentation
+- Claude Code tooling setup
+
+### 🚧 Not Yet Implemented (Needs Development)
+- Next.js application setup and configuration
+- React components and UI
+- API routes and handlers
+- Database models and connections
+- Scraping logic implementation
+- Media processing pipeline
+- Email notification system
+- Mock API for development
+- Test suite and coverage
+
+### 📋 Prerequisites for Development
+1. Install dependencies: `npm install`
+2. Create required configuration files:
+   - `tsconfig.json`
+   - `next.config.js`
+   - `tailwind.config.js`
+   - `postcss.config.js`
+   - `jest.config.js`
+   - `.eslintrc.json`
+3. Set up MongoDB connection
+4. Configure environment variables in `.env.local`
+5. Implement mock ChabadUniverse API for development
+
+### 🚀 Getting Started with Implementation
+When ready to begin development:
+1. Run `npm install` to install all dependencies
+2. Create the App Router structure in `/app`
+3. Set up MongoDB schemas in `/models`
+4. Implement scraping logic in `/lib/scraper`
+5. Build admin UI components in `/components/admin`
+6. Create API routes in `/app/api`
+7. Set up mock API server for local development
+8. Test in Valu Social Dev Tool iframe

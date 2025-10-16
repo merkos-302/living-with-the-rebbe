@@ -1,7 +1,20 @@
 ב״ה
 # Quick Start Guide
 
-Get the Living with the Rebbe admin tool running in 5 minutes.
+Get the Living with the Rebbe admin tool running in 5 minutes (once implemented).
+
+**Note**: This guide describes the intended workflow. The application code is not yet implemented.
+
+## Before You Start - Implementation Required
+
+The following components need to be implemented:
+1. Next.js application structure (`/app` directory)
+2. React components (`/components`)
+3. API routes (`/app/api`)
+4. MongoDB models (`/models`)
+5. Scraping logic (`/lib/scraper`)
+6. Mock API server (`/mock-api`)
+7. Configuration files (tsconfig.json, next.config.js, etc.)
 
 ## Prerequisites
 
