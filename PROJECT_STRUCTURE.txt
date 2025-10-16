@@ -1,0 +1,36 @@
+Living with the Rebbe - Project Structure
+==========================================
+
+Generated: $(date)
+
+CONFIGURATION FILES
+-------------------
+API_SPECIFICATION.md
+ARCHITECTURE.md
+CLAUDE.md
+DECISIONS.md
+DEPLOYMENT.md
+FUTURE_FEATURES.md
+jest.config.js
+jest.setup.js
+MVP_SCOPE.md
+next-env.d.ts
+next.config.js
+package-lock.json
+package.json
+postcss.config.js
+PROJECT_REVIEW.md
+PROJECT_STATUS.md
+QUICKSTART.md
+README.md
+SETUP.md
+tailwind.config.js
+tsconfig.json
+
+ALL TYPESCRIPT/TSX FILES
+------------------------
+./app/layout.tsx
+./app/page.tsx
+./types/index.ts
+./utils/env.ts
+./utils/logger.ts

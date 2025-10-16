@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Version control
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Package files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Generated files
+coverage/
+*.log
+*.min.js
+*.min.css
+
+# Database
+*.db
+mongodb/
+
+# Cache
+.cache/
+.turbo/
+.vercel/
+
+# Documentation
+*.md
+
+# Public assets
+public/media/
+public/newsletters/

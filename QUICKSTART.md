@@ -1,20 +1,29 @@
 ב״ה
 # Quick Start Guide
 
-Get the Living with the Rebbe admin tool running in 5 minutes (once implemented).
+Get the Living with the Rebbe admin tool running in 5 minutes.
 
-**Note**: This guide describes the intended workflow. The application code is not yet implemented.
+**Status**: Foundation complete! Next.js app is configured and ready for development.
 
-## Before You Start - Implementation Required
+## What's Already Set Up
 
-The following components need to be implemented:
-1. Next.js application structure (`/app` directory)
-2. React components (`/components`)
-3. API routes (`/app/api`)
-4. MongoDB models (`/models`)
-5. Scraping logic (`/lib/scraper`)
-6. Mock API server (`/mock-api`)
-7. Configuration files (tsconfig.json, next.config.js, etc.)
+✅ Next.js 15 with App Router
+✅ TypeScript with strict mode
+✅ Tailwind CSS with Hebrew/RTL support
+✅ Jest testing framework
+✅ ESLint and Prettier
+✅ Complete directory structure
+✅ Type definitions and utilities
+
+## What Still Needs Implementation
+
+The following components are planned for future epics:
+1. Database models and MongoDB connection
+2. API routes for scraping and publishing
+3. Admin UI components
+4. Scraping logic implementation
+5. Authentication providers (Valu integration)
+6. Mock API server for testing
 
 ## Prerequisites
 
@@ -31,84 +40,74 @@ cd living-with-the-rebbe
 npm install
 ```
 
-### 2. Start MongoDB (1 minute)
+### 2. Configure Environment (1 minute)
 ```bash
-# If using local MongoDB
-mongod --dbpath ~/data/db
+# Copy example environment file
+cp .env.example .env.local
 
-# Or use Docker
-docker run -d -p 27017:27017 mongo:latest
+# Edit with your values
+nano .env.local
 ```
 
-### 3. Configure Environment (1 minute)
-```bash
-# Create env file
-cat > .env.local << EOF
+Required environment variables:
+```env
 ARCHIVE_BASE_URL=https://merkos-living.s3.us-west-2.amazonaws.com
-MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 NEXT_PUBLIC_CHABAD_UNIVERSE_URL=https://chabaduniverse.com
-MOCK_API_PORT=3001
-EOF
+MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 ```
 
-### 4. Start Mock API (1 minute)
+### 3. Start Development Server (1 minute)
 ```bash
-# In terminal 1
-npm run mock-api
-# Mock API running at http://localhost:3001
-```
-
-### 5. Start Development Server (1 minute)
-```bash
-# In terminal 2
 npm run dev
 # App running at http://localhost:3000
 ```
 
-## Verify Everything Works
+### 4. Verify Installation (1 minute)
+Open your browser to http://localhost:3000
 
-### Test Scraping
-1. Open http://localhost:3000/admin
-2. Click "Fetch Recent Newsletters"
-3. Should see 3 newsletters appear
+You should see:
+- "Living with the Rebbe - Admin Tool" heading
+- Status message showing the current project phase
+- Clean, styled interface with Hebrew font support
 
-### Test Processing
-1. Click "Process" on any newsletter
-2. Check MongoDB for saved data:
+### 5. Run Tests (Optional, 1 minute)
 ```bash
-mongosh
-use living-with-rebbe
-db.newsletters.find().pretty()
+# Run the test suite
+npm test
+
+# Run with coverage
+npm test -- --coverage
+
+# Run linting
+npm run lint
 ```
 
-### Test Mock API
-```bash
-# Test media upload endpoint
-curl -X POST http://localhost:3001/api/v1/cms/media \
-  -H "Content-Type: application/json" \
-  -d '{"url": "test.jpg"}'
+## Current Development Status
 
-# Should return mock response
-```
+### What Works Now
+- ✅ Development server runs successfully
+- ✅ TypeScript compilation works
+- ✅ Tailwind CSS styling applied
+- ✅ Hebrew/RTL font loading
+- ✅ Jest tests can be run
+- ✅ ESLint code checking
+- ✅ Prettier code formatting
+- ✅ Git hooks for code quality
+
+### What's Coming Next (Future Epics)
+- 📋 Admin dashboard UI
+- 📋 Newsletter scraping functionality
+- 📋 Database integration
+- 📋 API endpoints
+- 📋 Authentication with Valu
+- 📋 Mock API for testing
 
 ## Common Issues
-
-### MongoDB Connection Failed
-```bash
-# Check MongoDB is running
-ps aux | grep mongod
-
-# If not, start it
-mongod --dbpath ~/data/db
-```
 
 ### Port Already in Use
 ```bash
 # Kill process on port 3000
 lsof -ti:3000 | xargs kill -9
-
-# Kill process on port 3001
-lsof -ti:3001 | xargs kill -9
 ```
 
 ### Module Not Found
@@ -119,48 +118,81 @@ npm install
 ```
 
 ## Project Structure
+
+Current structure (Epic #2 complete):
 ```
-├── app/
-│   ├── admin/          # Admin dashboard
-│   ├── api/           # API routes
-│   └── lib/           # Core logic
-├── components/        # UI components
-├── models/           # MongoDB schemas
-├── mock-api/         # Mock CMS API
-└── public/          # Static assets
+living-with-the-rebbe/
+├── app/                    # Next.js 15 App Router ✅
+│   ├── layout.tsx         # Root layout with fonts ✅
+│   ├── page.tsx           # Home page ✅
+│   ├── globals.css        # Global styles ✅
+│   ├── admin/             # Admin pages (to be created)
+│   └── api/               # API routes (to be created)
+├── components/            # React components ✅
+│   ├── admin/            # Admin UI (to be created)
+│   └── ui/               # Reusable UI (to be created)
+├── lib/                  # Core libraries ✅
+│   ├── scraper/         # Scraping logic (to be created)
+│   ├── cms/             # CMS integration (to be created)
+│   └── db/              # Database (to be created)
+├── models/               # MongoDB schemas ✅
+├── hooks/                # React hooks ✅
+├── types/                # TypeScript types ✅
+├── utils/                # Utilities ✅
+│   ├── env.ts           # Environment vars ✅
+│   └── logger.ts        # Logging ✅
+├── scripts/              # CLI scripts ✅
+├── public/               # Static assets ✅
+└── __tests__/            # Test files ✅
 ```
 
-## Next Steps
+## Next Steps for Development
 
-1. **Explore Admin UI**: http://localhost:3000/admin
-2. **Check Mock API**: http://localhost:3001
-3. **View Logs**: Check terminal for processing details
-4. **Modify Code**: Changes auto-reload
+1. **Start with Database Layer (Epic #3)**:
+   - Create MongoDB connection utility
+   - Implement Newsletter and ProcessingSession models
+
+2. **Or Start with Providers (Epic #4)**:
+   - Create ValuApiProvider
+   - Create AuthProvider
+   - Integrate into root layout
+
+3. **Explore Documentation**:
+   - [ARCHITECTURE.md](./ARCHITECTURE.md) - System design
+   - [API_SPECIFICATION.md](./API_SPECIFICATION.md) - API contracts
+   - [MVP_SCOPE.md](./MVP_SCOPE.md) - Feature scope
 
 ## Available Scripts
 
 ```bash
-npm run dev         # Start development server
-npm run build       # Build for production
-npm run mock-api    # Start mock API server
-npm test           # Run tests
-npm run lint       # Check code quality
+npm run dev              # Start development server
+npm run build            # Build for production
+npm start                # Start production server
+npm test                 # Run Jest tests
+npm run test:watch       # Run tests in watch mode
+npm run lint             # Check code quality
+npm run format           # Format code with Prettier
+npm run format:check     # Check formatting
 ```
 
-## Testing in ChabadUniverse Iframe
+## Testing in ChabadUniverse Iframe (Future)
 
+Once the UI is implemented:
 1. Get access to Valu Social Dev Tool
 2. Configure localhost:3000 as allowed origin
 3. Open ChabadUniverse
 4. Navigate to admin tool location
 5. Your local app loads in production iframe context
 
+See [docs/valu-social-dev-tool.md](./docs/valu-social-dev-tool.md) for details.
+
 ## Need Help?
 
 - Check [MVP_SCOPE.md](./MVP_SCOPE.md) for feature details
 - See [ARCHITECTURE.md](./ARCHITECTURE.md) for system design
 - Review [DECISIONS.md](./DECISIONS.md) for resolved questions
+- Contact: retzion@merkos302.com
 
 ---
 
-**Ready!** You should now have the app running locally with mock API. 🚀
+**Ready!** Foundation is complete. Time to start building features!

@@ -146,55 +146,78 @@ if (!user?.roles?.includes('channel_admin')) {
 
 ## Project Structure
 
+**Current State (Epic #2 Complete)**:
+
 ```
 living-with-the-rebbe/
-├── pages/
-│   ├── index.tsx                # Admin dashboard
-│   ├── scrape.tsx              # Scraping interface
-│   ├── preview.tsx             # Preview before publish
-│   └── api/
-│       ├── archive/
-│       │   └── fetch.ts        # Fetch archive list
-│       ├── newsletter/
-│       │   └── scrape.ts       # Scrape individual
-│       ├── cms/
-│       │   └── upload.ts       # Upload media
-│       └── channel/
-│           └── post.ts         # Post newsletter
+├── app/                        # Next.js 15 App Router ✅
+│   ├── layout.tsx             # Root layout with fonts ✅
+│   ├── page.tsx               # Home page ✅
+│   ├── globals.css            # Global styles ✅
+│   ├── admin/                 # Admin pages (Epic #6)
+│   │   └── page.tsx          # Dashboard
+│   └── api/                   # API routes (Epic #7)
+│       ├── scrape/
+│       │   └── route.ts      # Scraping endpoints
+│       ├── status/
+│       │   └── route.ts      # Status endpoints
+│       └── export/
+│           └── route.ts      # Export endpoints
 │
-├── components/
-│   └── admin/
-│       ├── ScrapeControls.tsx  # UI for scraping
-│       ├── NewsletterList.tsx  # List to process
-│       ├── PreviewPane.tsx     # Preview HTML
-│       └── PublishButton.tsx   # Publish action
+├── components/                # React components ✅
+│   ├── admin/                # Admin UI (Epic #6)
+│   │   ├── NewsletterList.tsx
+│   │   ├── ProcessingStatus.tsx
+│   │   └── ScrapeControls.tsx
+│   └── ui/                   # Reusable UI (Epic #6)
+│       ├── button.tsx
+│       ├── dialog.tsx
+│       └── toast.tsx
 │
-├── lib/
-│   ├── scraper/
-│   │   ├── archiveParser.ts   # Parse archive HTML
-│   │   ├── newsletterParser.ts # Parse newsletter
-│   │   └── mediaExtractor.ts  # Find media URLs
-│   ├── cms/
-│   │   ├── mediaUploader.ts   # Upload to CMS
-│   │   └── urlRewriter.ts     # Replace URLs
-│   ├── channel/
-│   │   └── publisher.ts        # Post to channel
-│   └── db/
-│       └── connection.ts      # MongoDB connection
+├── lib/                      # Core libraries ✅
+│   ├── scraper/             # Scraping logic (Epic #5)
+│   │   ├── archive.ts
+│   │   ├── newsletter.ts
+│   │   └── media.ts
+│   ├── cms/                 # CMS integration (Epic #8)
+│   │   ├── client.ts
+│   │   └── upload.ts
+│   ├── db/                  # Database (Epic #3)
+│   │   └── connection.ts
+│   └── providers/           # React providers (Epic #4)
+│       ├── ValuApiProvider.tsx
+│       └── AuthProvider.tsx
 │
-├── models/
-│   ├── Newsletter.ts          # Newsletter schema
-│   ├── ProcessingSession.ts   # Session tracking
-│   └── MediaMapping.ts        # URL mappings
+├── models/                  # Mongoose schemas ✅ (Epic #3)
+│   ├── Newsletter.ts
+│   └── ProcessingSession.ts
 │
-├── hooks/
-│   ├── useValuAuth.ts         # Authentication
-│   ├── useScraper.ts          # Scraping logic
-│   └── usePublisher.ts        # Publishing logic
+├── hooks/                   # Custom hooks ✅ (Epic #4+)
+│   ├── useValuAuth.ts
+│   ├── useScraper.ts
+│   └── usePublisher.ts
 │
-└── utils/
-    ├── hebrew.ts              # RTL text handling
-    └── validation.ts          # Input validation
+├── utils/                   # Utilities ✅
+│   ├── env.ts              # Environment vars ✅
+│   ├── logger.ts           # Logging ✅
+│   └── hebrew.ts           # RTL handling (Epic #6)
+│
+├── types/                   # TypeScript types ✅
+│   └── index.ts            # Core types ✅
+│
+├── scripts/                 # CLI scripts ✅
+│   ├── scrape-recent.js
+│   └── weekly-check.js
+│
+├── public/                  # Static assets ✅
+├── __tests__/               # Test files ✅
+└── Configuration files ✅
+    ├── tsconfig.json
+    ├── next.config.js
+    ├── tailwind.config.js
+    ├── jest.config.js
+    ├── .eslintrc.json
+    └── .prettierrc
 ```
 
 ## Core Components
