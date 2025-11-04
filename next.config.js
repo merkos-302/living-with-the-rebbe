@@ -8,6 +8,16 @@ const nextConfig = {
 
   // Configure headers for iframe deployment
   async headers() {
+    // Determine if we're in development mode
+    const isDev = process.env.NODE_ENV === 'development';
+
+    // Build frame-ancestors directive based on environment
+    // In development, we need to allow both apex domains and subdomains
+    // since localhost is embedded in the actual chabaduniverse.com site
+    const frameAncestors = isDev
+      ? "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* https://chabaduniverse.com https://*.chabaduniverse.com https://valu.social https://*.valu.social http://chabaduniverse.com http://*.chabaduniverse.com"
+      : "frame-ancestors 'self' https://chabaduniverse.com https://*.chabaduniverse.com https://valu.social https://*.valu.social";
+
     return [
       {
         source: '/:path*',
@@ -18,12 +28,12 @@ const nextConfig = {
             value: 'ALLOWALL',
           },
           {
-            // Alternative modern approach to X-Frame-Options
+            // Content Security Policy for iframe embedding
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://*.chabaduniverse.com https://*.valu.social;",
+            value: frameAncestors + ';',
           },
           {
-            // Enable CORS for API routes
+            // Enable CORS for API routes (allow all origins for iframe compatibility)
             key: 'Access-Control-Allow-Origin',
             value: '*',
           },
@@ -33,29 +43,22 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
+            value: 'Content-Type, Authorization, X-Requested-With',
+          },
+          {
+            // Allow credentials for iframe authentication
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
           },
         ],
       },
     ];
   },
 
-  // Image optimization configuration for external sources
+  // Image optimization configuration
+  // Since we download and cache media locally, we don't need external patterns
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'merkos-living.s3.us-west-2.amazonaws.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.merkos302.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.chabaduniverse.com',
-      },
-    ],
+    remotePatterns: [],
   },
 
   // Webpack configuration for Hebrew/RTL support and Node.js modules
