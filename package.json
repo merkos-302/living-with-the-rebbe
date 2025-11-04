@@ -6,6 +6,7 @@
     "full": "npm i && npm run build && npm run lint && npm test && npm run dev",
     "new": "rm -rf node_modules && npm cache clean --force && npm run full",
     "dev": "next dev",
+    "dev:https": "next dev --experimental-https",
     "dev:with-mock": "concurrently \"next dev\" \"npm run mock-api\"",
     "build": "next build",
     "start": "next start",
