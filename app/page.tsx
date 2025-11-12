@@ -28,8 +28,6 @@ export default function HomePage() {
           </p>
           <a
             href="/samples/5785/yom_kippur.html"
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md hover:shadow-lg"
           >
             <svg
@@ -48,7 +46,6 @@ export default function HomePage() {
             </svg>
             View Yom Kippur 5785 Sample
           </a>
-          <p className="text-xs text-blue-600 mt-4">Opens in a new tab</p>
         </div>
       </div>
     </main>
