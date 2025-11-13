@@ -138,6 +138,39 @@ Follow the same provider pattern as universe-portal in root layout:
 - `/scripts` - Node.js CLI scripts ✅ Directory created
 - `/public` - Static assets ✅ Directory created
 
+## Development Workflow
+
+This project uses a structured, self-documenting workflow with Claude Code. For complete details, see:
+
+**📖 [Claude Code Workflow Guide](docs/CLAUDE-CODE-WORKFLOW.md)**
+
+### Quick Workflow Overview
+
+1. **Start Session**: `/session-start [issue-name]` - Creates branch and session file
+2. **Develop**: Write code, tests, and use TodoWrite for progress tracking
+3. **End Session**: `/session-end` - Documents work with comprehensive summary
+4. **Update Docs**: `/update-docs` - Syncs all project documentation automatically
+5. **Commit**: `/save` - Runs quality checks, creates conventional commit
+6. **Pull Request**: `pr` - Creates comprehensive PR with test plan
+
+### Key Commands
+
+- `/session-start [name]` - Begin new development session with Git branch
+- `/session-update` - Document progress during long sessions
+- `/session-end` - Complete session with detailed summary
+- `/update-docs` - Auto-update all documentation files
+- `/save` - Commit with quality gates (tests, lint, build)
+
+### Self-Documenting Benefits
+
+The workflow automatically captures:
+- **Session files** - Complete development diary with decisions and solutions
+- **Documentation updates** - CLAUDE.md, README.md, and all docs stay in sync
+- **Commit messages** - Detailed "what" and "why" with conventional format
+- **PR descriptions** - Comprehensive summaries with test plans
+
+All development context is preserved without extra effort, creating a zero-effort knowledge base.
+
 ## Related Projects
 - **Universe-Portal** (`../universe-portal`): Reference architecture
 - **Valu API** (https://github.com/Roomful/valu-api): Iframe integration

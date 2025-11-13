@@ -31,6 +31,7 @@ To update all documentation files:
    - `PROJECT_REVIEW.md` (project review documentation)
    - `API_SPECIFICATION.md` (API specification document)
    - `FUTURE_FEATURES.md` (future features roadmap)
+   - `docs/CLAUDE-CODE-WORKFLOW.md` (comprehensive development workflow guide)
    - `docs/ARCHIVE/` folder containing historical documentation:
      - `DEPLOYMENT_GUIDE.md`
      - `DEVELOPMENT_GUIDE.md`
