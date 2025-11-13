@@ -14,6 +14,7 @@ Administrative tool for ChabadUniverse to scrape and publish "Living with the Re
 | Essential Docs | Description |
 |----------------|-------------|
 | [QUICKSTART.md](./QUICKSTART.md) | Get running in 5 minutes |
+| [Claude Code Workflow](./docs/CLAUDE-CODE-WORKFLOW.md) | Development workflow guide |
 | [MVP_SCOPE.md](./MVP_SCOPE.md) | What we're building |
 | [DECISIONS.md](./DECISIONS.md) | Resolved architectural decisions |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System design with diagrams |
