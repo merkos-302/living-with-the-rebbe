@@ -5,24 +5,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Current Status**: Foundation Complete - Epic #2 Finished (Implementation Ready)
+**Current Status**: Foundation Complete - Ready for HTML Processing Implementation
 
-This is an admin tool for ChabadUniverse channel administrators to scrape and publish "Living with the Rebbe" newsletters. The application:
+This is an admin tool for ChabadUniverse channel administrators to process "Living with the Rebbe" newsletters before distribution. The application:
 - Runs exclusively as an iframe within ChabadUniverse/Valu Social
-- **MVP Scope**: Scrapes 3 most recent newsletters + weekly updates (NOT ~400)
-- Downloads and caches media locally (we own all media, no auth required)
-- Sends email notifications to retzion@merkos302.com when ready
-- Exports to JSON for manual posting until API available
-- Will upload media and auto-post when ChabadUniverse API is ready
-- Preserves exact HTML styling from original newsletters
+- **Core Function**: Processes pasted HTML to upload resources to CMS
+- Takes newsletter HTML as input (paste or upload)
+- Extracts all external resources (PDFs, images, documents)
+- Downloads resources and uploads them to ChabadUniverse CMS
+- Replaces original URLs with CMS URLs (which handle auth/redirects)
+- Returns modified HTML ready for distribution
 - Uses Next.js 15 App Router (not Pages Router)
 
-## Architecture (Based on Universe-Portal)
+## Architecture
 
 ### Framework & Core Stack
 - **Next.js 15.x** with TypeScript for the application framework
 - **React 18.x** for UI components
-- **MongoDB/Mongoose** for state management and processing tracking
+- **MongoDB/Mongoose** for processing history tracking
 - **Vercel** for hosting and deployment
 
 ### UI & Styling
@@ -32,17 +32,16 @@ This is an admin tool for ChabadUniverse channel administrators to scrape and pu
 
 ### Valu/ChabadUniverse Integration
 - **@arkeytyp/valu-api** for iframe communication and authentication
-- **CMS API** for media upload (PUT endpoints)
-- **Channel API** for newsletter posting (POST endpoints)
+- **CMS API** for resource upload (PUT endpoints)
 - **Admin-only access** via Valu authentication
 
-### Content Processing Pipeline (MVP - 3 + Weekly)
-1. **Archive Scraper**: Fetches 3 most recent newsletters
-2. **Newsletter Parser**: Extracts HTML and media URLs
-3. **Media Downloader**: Caches media locally (no auth required)
-4. **Email Notifier**: Sends to retzion@merkos302.com
-5. **JSON Export**: Manual posting until API ready
-6. **Future**: Auto-upload and publish when API available
+### Content Processing Pipeline
+1. **HTML Input**: Admin pastes or uploads newsletter HTML
+2. **Resource Parser**: Extracts all external links using Cheerio
+3. **Resource Downloader**: Fetches files from original locations
+4. **CMS Uploader**: Uploads to ChabadUniverse CMS via Valu API
+5. **URL Replacer**: Swaps original URLs with CMS URLs
+6. **HTML Output**: Returns modified HTML for distribution
 
 ## Common Commands
 
@@ -66,41 +65,49 @@ npm run build
 NEXT_PUBLIC_CHABAD_UNIVERSE_URL=https://chabaduniverse.com
 CHABAD_UNIVERSE_API_KEY=<api-key>
 CHABAD_UNIVERSE_CHANNEL_ID=<target-channel>
-ARCHIVE_BASE_URL=https://merkos-living.s3.us-west-2.amazonaws.com
 MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 ```
 
-## Workflow
+## Processing Workflow
 
-### Scraping Process (MVP)
+### HTML Processing Flow
 1. Admin authenticates via Valu/ChabadUniverse
-2. Creates new processing session in database
-3. Fetches archive from `https://merkos-living.s3.us-west-2.amazonaws.com/Chazak/[year]/LivingWithTheRebbe.html`
-4. Parses and selects 3 most recent newsletter links (merkos302.com pattern)
-5. For each newsletter:
-   - Checks database for existing processing record
-   - If already posted, skips to next
-   - Extracts HTML content
-   - Identifies media assets
-   - Uploads media to CMS (stores mappings in DB)
-   - Rewrites URLs to CMS locations
-   - Posts to channel with tags (parsha, year)
-   - Updates database with success status and channel post ID
+2. Pastes newsletter HTML into the input interface
+3. System parses HTML to identify external resources:
+   - PDF documents (e.g., Torah portions, study guides)
+   - Images (newsletter graphics, photos)
+   - Other documents (Word files, etc.)
+4. For each resource:
+   - Downloads from original URL
+   - Validates file type and size
+   - Uploads to ChabadUniverse CMS
+   - Receives new CMS URL with auth handling
+   - Maps original URL → CMS URL
+5. Replaces all URLs in the HTML
+6. Presents modified HTML for admin review
+7. Admin copies final HTML for distribution
+
+### CMS URL Behavior
+The CMS URLs returned (e.g., `https://cms.chabaduniverse.com/api/resource/abc123`) automatically:
+- Check viewer authentication status
+- Redirect authenticated users to in-app view (within ChabadUniverse frame)
+- Redirect public users to website view
+- Track resource access for analytics
 
 ### API Integration
-- **Media Upload**: PUT to ChabadUniverse CMS, returns new URL
-- **Newsletter Post**: POST to community channel with HTML and tags
+- **Resource Upload**: PUT to ChabadUniverse CMS, returns new URL
 - **Authentication**: Via Valu getCurrentUser() for admin verification
+- **Error Handling**: Retry logic for failed uploads
 
 ## Key Considerations
 - **Admin-only tool** - No public access
 - **Iframe-only** - Does not function standalone
-- **State Management** - MongoDB tracks processing status and prevents duplicates
-- **Preserves styling** - Maintains exact HTML formatting
+- **Processing History** - MongoDB tracks all processing sessions
+- **Preserves HTML** - Maintains exact formatting, only replaces URLs
 - **Hebrew/RTL support** - Handles bidirectional text properly
-- **Recovery Support** - Can resume failed operations using database state
+- **Error Recovery** - Can retry failed uploads
 
-## Development Patterns (From Universe-Portal)
+## Development Patterns
 
 ### Provider Hierarchy
 Follow the same provider pattern as universe-portal in root layout:
@@ -120,16 +127,17 @@ Follow the same provider pattern as universe-portal in root layout:
 ### File Organization (Next.js 15 App Router)
 - `/app` - App Router structure ✅ Created
   - `/app/layout.tsx` - Root layout with fonts ✅
-  - `/app/page.tsx` - Home page placeholder ✅
+  - `/app/page.tsx` - Home page ✅
   - `/app/globals.css` - Global styles with Hebrew/RTL ✅
-  - `/app/admin` - Admin dashboard pages (to be created)
+  - `/app/admin` - Admin processing pages (to be created)
   - `/app/api` - API route handlers (to be created)
 - `/components` - React components ✅ Directory created
-  - `/components/admin` - Scraping and publishing UI (to be created)
+  - `/components/admin` - Processing UI components (to be created)
   - `/components/ui` - Reusable UI components (to be created)
 - `/lib` - Core libraries ✅ Directory created
-  - `/lib/scraper` - Scraping logic (to be created)
-  - `/lib/cms` - CMS integration (to be created)
+  - `/lib/parser` - HTML parsing logic (to be created)
+  - `/lib/cms` - CMS upload integration (to be created)
+  - `/lib/processor` - Resource processing (to be created)
   - `/lib/db` - Database connection (to be created)
 - `/models` - Mongoose schemas ✅ Directory created (schemas to be implemented)
 - `/hooks` - Custom React hooks ✅ Directory created
@@ -171,81 +179,61 @@ The workflow automatically captures:
 
 All development context is preserved without extra effort, creating a zero-effort knowledge base.
 
+## Implementation Roadmap
+
+### Phase 1: Core HTML Processing (Priority: IMMEDIATE)
+- [ ] HTML input component (textarea for paste)
+- [ ] Cheerio-based resource extractor
+- [ ] Resource URL validator
+- [ ] Basic UI layout
+
+### Phase 2: Resource Processing (Priority: HIGH)
+- [ ] Parallel resource downloader
+- [ ] File type validation
+- [ ] CMS upload integration via Valu API
+- [ ] URL replacement engine
+
+### Phase 3: User Interface (Priority: MEDIUM)
+- [ ] Processing status display
+- [ ] Before/after preview
+- [ ] Copy-to-clipboard for output
+- [ ] Error handling UI
+
+### Phase 4: Data Persistence (Priority: LOW)
+- [ ] MongoDB models for history
+- [ ] Processing session tracking
+- [ ] Analytics dashboard
+
 ## Related Projects
 - **Universe-Portal** (`../universe-portal`): Reference architecture
 - **Valu API** (https://github.com/Roomful/valu-api): Iframe integration
 
 ## Testing Approach
-- Unit tests for scraping logic
+- Unit tests for HTML parsing logic
 - Integration tests for CMS upload
 - Mock Valu authentication for development
 - Test in actual ChabadUniverse iframe
 
-## Project Implementation Status
+## Project Status Summary
 
-### ✅ Epic #2 Complete: Foundation and Project Setup
-- ✅ Next.js 15.0.0 with App Router configured
-- ✅ TypeScript 5.3.3 with strict mode enabled
-- ✅ Tailwind CSS 3.4.0 with Hebrew/RTL support
-- ✅ Complete directory structure created
-- ✅ Root layout with Inter and Heebo fonts
-- ✅ Global styles with CSS custom properties
-- ✅ Jest 29.7.0 testing framework configured
-- ✅ ESLint 8.56.0 with TypeScript rules
-- ✅ Prettier 3.6.2 code formatting
-- ✅ Husky 9.1.7 with lint-staged pre-commit hooks
-- ✅ Core type definitions (Newsletter, Session, API interfaces)
-- ✅ Environment variable utilities with validation
-- ✅ Logger utility for structured logging
-- ✅ All configuration files created and tested
-- ✅ Comprehensive documentation
-- ✅ Claude Code tooling setup
-- ✅ Dependencies installed (30+ packages)
+### ✅ Complete
+- Next.js 15 setup with App Router
+- TypeScript configuration
+- Tailwind CSS with Hebrew/RTL support
+- Directory structure
+- Core type definitions
+- Development workflow
 
-### 📋 Next Implementation Phases
+### 📋 To Implement
+- HTML input interface
+- Resource extraction logic
+- Download/upload pipeline
+- URL replacement engine
+- Admin UI components
+- Processing history tracking
 
-**Epic #3: Database Layer**
-- Create MongoDB connection utility
-- Implement Newsletter Mongoose model
-- Implement ProcessingSession Mongoose model
-- Add database seed scripts
-
-**Epic #4: Authentication & Providers**
-- Create ValuApiProvider component
-- Create AuthProvider component
-- Integrate providers into root layout
-- Add useValuAuth hook
-
-**Epic #5: Core Scraping Logic**
-- Archive scraper implementation
-- Newsletter parser
-- Media extractor
-- URL rewriter
-
-**Epic #6: Admin UI Components**
-- Admin dashboard page
-- Newsletter list component
-- Processing status component
-- Radix UI base components
-
-**Epic #7: API Routes**
-- Scraping API routes
-- Status API routes
-- Export API routes
-- Webhook endpoints
-
-**Epic #8: Testing & Quality**
-- Unit tests for utilities
-- Integration tests for API routes
-- Component tests for UI
-- Mock API server for development
-
-### 🚀 Development Environment Ready
-All prerequisites are complete. To start development:
-1. ✅ Dependencies installed: `npm install`
-2. ✅ Configuration files created and working
-3. ✅ Directory structure established
-4. ✅ Type definitions in place
-5. Configure `.env.local` with your values
-6. Start development server: `npm run dev`
-7. Begin implementing Epic #3 (Database Layer) or Epic #4 (Providers)
+### 🚀 Getting Started
+1. Configure `.env.local` with your values
+2. Run `npm run dev` to start development
+3. Begin with Phase 1: HTML input and parsing
+4. Use mock CMS API for development
