@@ -3,7 +3,7 @@
 
 Get the Living with the Rebbe admin tool running in 5 minutes.
 
-**Status**: Foundation complete! Next.js app is configured and ready for development.
+**Status**: Foundation complete! Next.js app is configured and ready for HTML processing implementation.
 
 ## What's Already Set Up
 
@@ -14,16 +14,17 @@ Get the Living with the Rebbe admin tool running in 5 minutes.
 ✅ ESLint and Prettier
 ✅ Complete directory structure
 ✅ Type definitions and utilities
+✅ Sample newsletter with assets
 
 ## What Still Needs Implementation
 
-The following components are planned for future epics:
-1. Database models and MongoDB connection
-2. API routes for scraping and publishing
-3. Admin UI components
-4. Scraping logic implementation
-5. Authentication providers (Valu integration)
-6. Mock API server for testing
+The following components are planned for the HTML processing workflow:
+1. HTML input interface (paste/upload)
+2. Resource parser using Cheerio
+3. CMS upload integration via Valu API
+4. URL replacement engine
+5. Admin UI components
+6. Processing history with MongoDB
 
 ## Prerequisites
 
@@ -51,8 +52,8 @@ nano .env.local
 
 Required environment variables:
 ```env
-ARCHIVE_BASE_URL=https://merkos-living.s3.us-west-2.amazonaws.com
 NEXT_PUBLIC_CHABAD_UNIVERSE_URL=https://chabaduniverse.com
+CHABAD_UNIVERSE_API_KEY=your-api-key  # For CMS uploads
 MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 ```
 
@@ -67,7 +68,7 @@ Open your browser to http://localhost:3000
 
 You should see:
 - "Living with the Rebbe - Admin Tool" heading
-- Status message showing the current project phase
+- Button to view sample newsletter
 - Clean, styled interface with Hebrew font support
 
 ### 5. Run Tests (Optional, 1 minute)
@@ -89,18 +90,20 @@ npm run lint
 - ✅ TypeScript compilation works
 - ✅ Tailwind CSS styling applied
 - ✅ Hebrew/RTL font loading
+- ✅ Sample newsletter viewable
 - ✅ Jest tests can be run
 - ✅ ESLint code checking
 - ✅ Prettier code formatting
 - ✅ Git hooks for code quality
 
-### What's Coming Next (Future Epics)
-- 📋 Admin dashboard UI
-- 📋 Newsletter scraping functionality
-- 📋 Database integration
-- 📋 API endpoints
-- 📋 Authentication with Valu
-- 📋 Mock API for testing
+### What's Coming Next (HTML Processing)
+- 📋 HTML input component for pasting newsletters
+- 📋 Resource extraction using Cheerio
+- 📋 Parallel resource downloading
+- 📋 CMS upload via Valu API
+- 📋 URL replacement in HTML
+- 📋 Processing status display
+- 📋 Before/after preview
 
 ## Common Issues
 
@@ -119,22 +122,22 @@ npm install
 
 ## Project Structure
 
-Current structure (Epic #2 complete):
+Current structure (Foundation complete):
 ```
 living-with-the-rebbe/
 ├── app/                    # Next.js 15 App Router ✅
 │   ├── layout.tsx         # Root layout with fonts ✅
-│   ├── page.tsx           # Home page ✅
+│   ├── page.tsx           # Home page with sample ✅
 │   ├── globals.css        # Global styles ✅
 │   ├── admin/             # Admin pages (to be created)
 │   └── api/               # API routes (to be created)
 ├── components/            # React components ✅
-│   ├── admin/            # Admin UI (to be created)
+│   ├── admin/            # Processing UI (to be created)
 │   └── ui/               # Reusable UI (to be created)
 ├── lib/                  # Core libraries ✅
-│   ├── scraper/         # Scraping logic (to be created)
+│   ├── parser/          # HTML parsing (to be created)
 │   ├── cms/             # CMS integration (to be created)
-│   └── db/              # Database (to be created)
+│   └── processor/       # Resource processing (to be created)
 ├── models/               # MongoDB schemas ✅
 ├── hooks/                # React hooks ✅
 ├── types/                # TypeScript types ✅
@@ -143,24 +146,31 @@ living-with-the-rebbe/
 │   └── logger.ts        # Logging ✅
 ├── scripts/              # CLI scripts ✅
 ├── public/               # Static assets ✅
+│   └── samples/         # Sample newsletter ✅
 └── __tests__/            # Test files ✅
 ```
 
 ## Next Steps for Development
 
-1. **Start with Database Layer (Epic #3)**:
-   - Create MongoDB connection utility
-   - Implement Newsletter and ProcessingSession models
+1. **Start with HTML Parser**:
+   - Create HTML input component
+   - Implement Cheerio-based resource extractor
+   - Test with sample newsletter
 
-2. **Or Start with Providers (Epic #4)**:
-   - Create ValuApiProvider
-   - Create AuthProvider
-   - Integrate into root layout
+2. **Build Resource Processing**:
+   - Implement parallel downloader
+   - Create CMS upload integration
+   - Build URL replacement engine
 
-3. **Explore Documentation**:
+3. **Create Admin UI**:
+   - Processing dashboard
+   - Status indicators
+   - Output viewer with copy function
+
+4. **Explore Documentation**:
+   - [PROJECT_BRIEF.md](./PROJECT_BRIEF.md) - High-level overview
    - [ARCHITECTURE.md](./ARCHITECTURE.md) - System design
-   - [API_SPECIFICATION.md](./API_SPECIFICATION.md) - API contracts
-   - [MVP_SCOPE.md](./MVP_SCOPE.md) - Feature scope
+   - [PROJECT_STATUS_SUMMARY.md](./PROJECT_STATUS_SUMMARY.md) - Detailed roadmap
 
 ## Available Scripts
 
@@ -175,7 +185,7 @@ npm run format           # Format code with Prettier
 npm run format:check     # Check formatting
 ```
 
-## Testing in ChabadUniverse Iframe (Future)
+## Testing in ChabadUniverse Iframe
 
 Once the UI is implemented:
 1. Get access to Valu Social Dev Tool
@@ -184,15 +194,28 @@ Once the UI is implemented:
 4. Navigate to admin tool location
 5. Your local app loads in production iframe context
 
-See [docs/valu-social-dev-tool.md](./docs/valu-social-dev-tool.md) for details.
+## Processing Workflow (To Be Implemented)
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  📝 PASTE HTML  │────▶│  🔍 PARSE LINKS │────▶│ 📥 DOWNLOAD     │
+│                 │     │                 │     │    RESOURCES    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                         │
+                                                         ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│ ✅ GET OUTPUT   │◀────│ 🔄 REPLACE URLs │◀────│ ☁️ UPLOAD TO    │
+│                 │     │                 │     │     CMS         │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
 
 ## Need Help?
 
-- Check [MVP_SCOPE.md](./MVP_SCOPE.md) for feature details
+- Check [PROJECT_BRIEF.md](./PROJECT_BRIEF.md) for workflow details
 - See [ARCHITECTURE.md](./ARCHITECTURE.md) for system design
-- Review [DECISIONS.md](./DECISIONS.md) for resolved questions
+- Review [PROJECT_STATUS_SUMMARY.md](./PROJECT_STATUS_SUMMARY.md) for roadmap
 - Contact: retzion@merkos302.com
 
 ---
 
-**Ready!** Foundation is complete. Time to start building features!
+**Ready!** Foundation is complete. Time to implement the HTML processing features!
