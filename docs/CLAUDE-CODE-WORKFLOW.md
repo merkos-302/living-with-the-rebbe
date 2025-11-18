@@ -1,8 +1,8 @@
 # Claude Code Development Workflow Guide
 
-**Version**: 1.0
-**Last Updated**: 2025-11-05
-**Audience**: All levels - from beginners to experienced Claude Code users
+**Version**: 1.1
+**Last Updated**: 2025-11-18
+**Purpose**: Universal development workflow for any project using Claude Code
 
 ---
 
@@ -23,7 +23,7 @@
 
 ## Overview
 
-This guide documents a complete development workflow using Claude Code, from planning through deployment. The workflow emphasizes:
+This guide documents a complete, project-agnostic development workflow using Claude Code, from planning through deployment. The workflow emphasizes:
 
 - **Structured sessions** with comprehensive documentation
 - **Quality gates** through automated pre-commit checks
@@ -54,8 +54,8 @@ Before starting your first development session, ensure you have:
 
 2. **Project Initialization**
    - Git repository initialized
-   - Node.js project with `package.json`
-   - Pre-commit hooks configured (Husky + lint-staged)
+   - Project with appropriate package manager (npm, yarn, pnpm, etc.)
+   - Pre-commit hooks configured (Husky + lint-staged or equivalent)
 
 3. **Slash Commands Configured**
    - Create `.claude/commands/` directory
@@ -79,26 +79,16 @@ Before starting your first development session, ensure you have:
        ├── .current-session
        └── [session-files].md
 
-   docs/
-   ├── README.md
-   ├── CLAUDE.md
-   ├── QUICKSTART.md
-   ├── DEPLOYMENT.md
-   ├── ARCHITECTURE.md
-   └── [other-docs].md
+   docs/                    # Or your documentation directory
+   └── [documentation].md
    ```
 
 5. **Testing & Quality Tools**
-   ```json
-   {
-     "scripts": {
-       "test": "jest",
-       "lint": "eslint .",
-       "build": "next build",
-       "format": "prettier --write ."
-     }
-   }
-   ```
+   Configure appropriate scripts in your package manager:
+   - Test runner (Jest, Vitest, Mocha, etc.)
+   - Linter (ESLint, TSLint, Pylint, etc.)
+   - Build command (if applicable)
+   - Formatter (Prettier, Black, etc.)
 
 ---
 
@@ -108,7 +98,7 @@ Before starting your first development session, ensure you have:
 
 ```mermaid
 graph TD
-    A[Planning & PRD] --> B[Create GitHub Issues]
+    A[Planning & Requirements] --> B[Create GitHub Issues]
     B --> C[Create Milestones]
     C --> D[Select Issue]
     D --> E[Start Session]
@@ -137,13 +127,13 @@ Before any coding begins, establish clear requirements and trackable tasks.
 
 **Example prompt to Claude Code:**
 ```
-Based on the PRD in docs/PRD.md, create comprehensive GitHub issues
+Based on the project requirements, create comprehensive GitHub issues
 with clear acceptance criteria, technical requirements, and estimated
 complexity. Group related issues into milestones.
 ```
 
 **What Claude Code does:**
-- Reads your PRD/planning documents
+- Reads your requirements documents
 - Creates detailed GitHub Issues with:
   - Clear titles
   - Acceptance criteria
@@ -156,24 +146,24 @@ complexity. Group related issues into milestones.
 
 **Example Issue Created:**
 ```markdown
-Title: Implement Newsletter Archive Scraper
-Labels: feature, epic-3, backend
+Title: Implement User Authentication
+Labels: feature, backend, priority-high
 
 ## Description
-Create a scraper to fetch newsletter archives from S3 bucket.
+Create a secure authentication system for user login and registration.
 
 ## Acceptance Criteria
-- [ ] Fetch archive HTML from S3
-- [ ] Parse newsletter links
-- [ ] Extract metadata (date, parsha, year)
-- [ ] Handle pagination
-- [ ] Error handling for network issues
+- [ ] User can register with email/password
+- [ ] User can log in with credentials
+- [ ] Sessions persist across requests
+- [ ] Password reset functionality
+- [ ] Input validation and error handling
 
 ## Technical Requirements
-- Use node-fetch for HTTP requests
-- Parse HTML with cheerio
-- Implement retry logic with exponential backoff
-- Add comprehensive error logging
+- Use secure password hashing (bcrypt/argon2)
+- Implement JWT or session-based auth
+- Add rate limiting to prevent brute force
+- Include comprehensive error messages
 
 ## Estimated Complexity
 Medium (4-8 hours)
@@ -198,14 +188,14 @@ From GitHub, identify the issue you'll work on. Note the issue title/description
 
 **Command:**
 ```bash
-/session-start Implement newsletter archive scraper
+/session-start Implement user authentication
 ```
 
 **What happens:**
 
 1. **Session Name Formatting**
-   - Input: `Implement newsletter archive scraper`
-   - Formatted: `implement-newsletter-archive-scraper`
+   - Input: `Implement user authentication`
+   - Formatted: `implement-user-authentication`
    - (Filesystem-friendly, no spaces, lowercase)
 
 2. **Commit Type Selection**
@@ -222,23 +212,8 @@ From GitHub, identify the issue you'll work on. Note the issue title/description
    6. ♻️ refactor - Code refactoring
    7. ⚡️ perf - Performance improvements
    8. ✅ test - Tests
-   9. 🧪 test - Add a failing test
-   10. 🔧 chore - Tooling, configuration
-   11. 🚀 ci - CI/CD improvements
-   12. 🗑️ revert - Reverting changes
-   13. 🚨 fix - Fix compiler/linter warnings
-   14. 🔒️ fix - Fix security issues
-   15. 👥 chore - Add or update contributors
-   16. 🚚 refactor - Move or rename resources
-   17. 🏗️ refactor - Make architectural changes
-   18. 🔀 chore - Merge branches
-   19. 📦️ chore - Add or update compiled files or packages
-   20. ➕ chore - Add a dependency
-   21. ➖ chore - Remove a dependency
-   22. 🌱 chore - Add or update seed files
-   23. 🧑‍💻 chore - Improve developer experience
-   24. 🧵 feat - Add or update code related to multithreading or concurrency
-   25. None - Don't create a branch
+   9. 🔧 chore - Tooling, configuration
+   10. None - Don't create a branch
    ```
 
    **You select:** `1` (for feat)
@@ -248,7 +223,7 @@ From GitHub, identify the issue you'll work on. Note the issue title/description
    Branch name format: `{type}/{formatted-session-name}`
 
    ```bash
-   git checkout -b feat/implement-newsletter-archive-scraper
+   git checkout -b feat/implement-user-authentication
    ```
 
    **Branch name validation:**
@@ -257,41 +232,41 @@ From GitHub, identify the issue you'll work on. Note the issue title/description
 
 4. **Session File Creation**
 
-   Creates: `.claude/sessions/2025-11-05-1430-Implement-newsletter-archive-scraper.md`
+   Creates: `.claude/sessions/YYYY-MM-DD-HHMM-implement-user-authentication.md`
 
    **File contents:**
    ```markdown
-   # Implement newsletter archive scraper - 2025-11-05 14:30
+   # Implement user authentication - YYYY-MM-DD HH:MM
 
    ## Session Overview
-   - **Started**: 2025-11-05 14:30
-   - **Git Branch**: `feat/implement-newsletter-archive-scraper`
+   - **Started**: YYYY-MM-DD HH:MM
+   - **Git Branch**: `feat/implement-user-authentication`
 
    ## Goals
-   - Implement S3 archive fetching
-   - Parse newsletter links from HTML
-   - Extract metadata (date, parsha, year)
-   - Add error handling and retry logic
+   - Implement user registration
+   - Add login functionality
+   - Set up session management
+   - Add password reset
+   - Write tests
 
    ## Progress
-   - [ ] Create scraper module structure
-   - [ ] Implement S3 fetch logic
-   - [ ] Add HTML parsing with cheerio
-   - [ ] Extract newsletter metadata
-   - [ ] Implement retry logic
-   - [ ] Add comprehensive error handling
+   - [ ] Create user model
+   - [ ] Implement registration endpoint
+   - [ ] Implement login endpoint
+   - [ ] Add session/JWT handling
+   - [ ] Add password reset
    - [ ] Write unit tests
 
    ## Notes
-   - Using node-fetch for HTTP requests
-   - Cheerio for HTML parsing
+   - Using bcrypt for password hashing
+   - JWT tokens for authentication
    ```
 
 5. **Current Session Tracking**
 
    Updates `.claude/sessions/.current-session`:
    ```
-   2025-11-05-1430-Implement-newsletter-archive-scraper.md
+   YYYY-MM-DD-HHMM-implement-user-authentication.md
    ```
 
 **Session started! You're now ready to develop.**
@@ -317,18 +292,18 @@ For complex sessions, Claude Code proactively uses the TodoWrite tool to track p
 // Claude creates this internally:
 [
   {
-    content: "Create scraper module structure",
-    activeForm: "Creating scraper module structure",
+    content: "Create user model",
+    activeForm: "Creating user model",
     status: "in_progress"
   },
   {
-    content: "Implement S3 fetch logic",
-    activeForm: "Implementing S3 fetch logic",
+    content: "Implement registration endpoint",
+    activeForm: "Implementing registration endpoint",
     status: "pending"
   },
   {
-    content: "Add HTML parsing with cheerio",
-    activeForm: "Adding HTML parsing with cheerio",
+    content: "Implement login endpoint",
+    activeForm: "Implementing login endpoint",
     status: "pending"
   }
 ]
@@ -353,17 +328,9 @@ For large, complex sessions, request parallel agent execution for efficiency.
 **Example request:**
 ```
 Please use parallel agents to:
-1. Search for existing S3 utilities in the codebase
-2. Find similar scraping implementations for reference
-3. Locate test file patterns and conventions
-```
-
-**Claude's response:**
-```typescript
-// Single message with multiple Task tool calls
-Task(subagent_type="Explore", prompt="Find S3 utilities...")
-Task(subagent_type="Explore", prompt="Find scraping implementations...")
-Task(subagent_type="Explore", prompt="Analyze test patterns...")
+1. Search for existing authentication implementations
+2. Find test patterns in the codebase
+3. Locate configuration files
 ```
 
 **Benefits:**
@@ -383,10 +350,10 @@ Claude uses `AskUserQuestion` tool to clarify requirements or design decisions.
 
 **Example interaction:**
 ```
-Claude: "I found two approaches for implementing retry logic:
+Claude: "I found two approaches for implementing authentication:
 
-1. Use built-in fetch retry with exponential backoff
-2. Implement custom retry wrapper with configurable strategy
+1. Use JWT tokens with stateless authentication
+2. Use session-based authentication with server storage
 
 Which approach would you prefer?"
 
@@ -410,12 +377,12 @@ You: [Select option or provide custom input]
 
 **Example update:**
 ```markdown
-## Progress Update - 14:45
-- ✅ Created scraper module structure
-- ✅ Implemented S3 fetch logic
-- 🔄 Working on HTML parsing with cheerio
-- 📝 Found existing parseHtml utility in /lib/utils
-- ⚠️ Note: S3 bucket requires CORS configuration for dev environment
+## Progress Update - HH:MM
+- ✅ Created user model
+- ✅ Implemented registration
+- 🔄 Working on login endpoint
+- 📝 Found existing auth utility in /lib/auth
+- ⚠️ Note: Need to handle rate limiting
 ```
 
 #### 3.5 Development Best Practices
@@ -469,94 +436,56 @@ When your work is complete (or you're pausing), properly close the session.
    ---
 
    ## Session Summary
-   **Ended**: 2025-11-05 16:30
-   **Duration**: 2 hours
+   **Ended**: YYYY-MM-DD HH:MM
+   **Duration**: X hours Y minutes
 
    ### Git Summary
-   - **Total files changed**: 8 files
-     - Added: `lib/scraper/archive.ts` (archive scraping logic)
-     - Added: `lib/scraper/parser.ts` (HTML parsing utilities)
-     - Added: `lib/scraper/types.ts` (TypeScript types)
-     - Added: `__tests__/scraper/archive.test.ts` (unit tests)
-     - Modified: `package.json` (added cheerio dependency)
-     - Modified: `lib/scraper/index.ts` (export scraper modules)
-     - Added: `lib/utils/retry.ts` (retry logic utility)
-     - Modified: `types/newsletter.ts` (added Archive type)
-   - **Lines changed**: 456 insertions, 12 deletions
-   - **Commits made**: 0 (changes not yet committed)
-   - **Final status**: Changes staged but not committed
-   - **Branch**: `feat/implement-newsletter-archive-scraper`
+   - **Total files changed**: N files
+     - Added: [list of new files]
+     - Modified: [list of modified files]
+     - Deleted: [list of deleted files]
+   - **Lines changed**: XXX insertions, YY deletions
+   - **Commits made**: N
+   - **Final status**: [staged/unstaged/clean]
+   - **Branch**: `feat/implement-user-authentication`
 
    ### Todo Summary
-   - **Total tasks**: 7
-   - **Completed tasks**: 7/7 (100%)
-     1. ✅ Create scraper module structure
-     2. ✅ Implement S3 fetch logic
-     3. ✅ Add HTML parsing with cheerio
-     4. ✅ Extract newsletter metadata
-     5. ✅ Implement retry logic
-     6. ✅ Add comprehensive error handling
-     7. ✅ Write unit tests
-   - **Incomplete tasks**: None
+   - **Total tasks**: N
+   - **Completed tasks**: X/N (XX%)
+   - **Incomplete tasks**: [list]
 
    ### Key Accomplishments
-   - Successfully implemented archive scraper with S3 integration
-   - Added HTML parsing using cheerio library
-   - Implemented exponential backoff retry logic
-   - Created comprehensive error handling for network failures
-   - Wrote 15 unit tests with 98% coverage
-   - Added TypeScript types for all scraper interfaces
-
-   ### Features Implemented
-   - Archive fetching from S3 with retry logic
-   - HTML parsing to extract newsletter links
-   - Metadata extraction (date, parsha, year)
-   - Pagination support for large archives
-   - Comprehensive error logging
-   - URL validation and sanitization
+   - [Major achievements]
+   - [Features implemented]
+   - [Problems solved]
 
    ### Problems Encountered and Solutions
-   - **Problem**: S3 CORS errors in development
-     - **Solution**: Added CORS configuration to S3 bucket for localhost
-   - **Problem**: Hebrew character encoding issues
-     - **Solution**: Explicitly set UTF-8 encoding in fetch headers
-   - **Problem**: Inconsistent date formats in archives
-     - **Solution**: Created flexible date parser supporting multiple formats
+   - **Problem**: [Issue description]
+     - **Solution**: [How it was resolved]
 
    ### Breaking Changes or Important Findings
-   - None - this is new functionality
-   - Note: Requires `ARCHIVE_BASE_URL` environment variable
-   - Cheerio dependency added to package.json
+   - [Any breaking changes]
+   - [Important discoveries]
 
    ### Dependencies Added/Removed
-   - **Added**:
-     - `cheerio@^1.0.0-rc.12` (HTML parsing)
-     - `@types/cheerio@^0.22.35` (TypeScript types)
+   - **Added**: [new packages]
+   - **Removed**: [removed packages]
 
    ### Configuration Changes
-   - Added `ARCHIVE_BASE_URL` to `.env.example`
-   - Updated S3 bucket CORS policy
-
-   ### Deployment Steps Taken
-   - None (local changes only)
+   - [Environment variables]
+   - [Config file updates]
 
    ### Lessons Learned
-   - Always handle Hebrew/RTL text with explicit UTF-8 encoding
-   - S3 CORS must be configured for development environment
-   - Exponential backoff prevents overwhelming S3 on failures
-   - Cheerio is more reliable than regex for HTML parsing
-   - Date parsing needs flexibility for inconsistent formats
+   - [Key insights]
+   - [Best practices discovered]
 
    ### What Wasn't Completed
-   - All planned tasks completed successfully
+   - [Incomplete items]
+   - [Reason for incompletion]
 
    ### Tips for Future Developers
-   1. Test with actual archive HTML files from S3
-   2. Use cheerio selectors instead of complex regex
-   3. Always validate URLs before making requests
-   4. Consider caching parsed archives to reduce S3 requests
-   5. Add integration tests with real S3 bucket
-   6. Monitor rate limits if scraping frequently
+   - [Helpful advice]
+   - [Gotchas to watch for]
    ```
 
 4. **Clears current session tracker:**
@@ -569,7 +498,7 @@ When your work is complete (or you're pausing), properly close the session.
    ✅ Session Ended Successfully
 
    The development session has been fully documented in:
-   .claude/sessions/2025-11-05-1430-Implement-newsletter-archive-scraper.md
+   .claude/sessions/YYYY-MM-DD-HHMM-implement-user-authentication.md
 
    Would you like to commit and push your changes with `/save`?
    ```
@@ -599,72 +528,27 @@ Keep all project documentation in sync with the codebase automatically.
    - Ensures no documentation is missed
 
 2. **Analysis Phase**
-   - Scans entire project structure:
-     ```bash
-     components/**    # React components
-     app/**           # Next.js app pages and API routes
-     lib/**           # Core libraries
-     hooks/**         # Custom hooks
-     __tests__/**     # Test files
-     models/**        # Database models
-     ```
+   - Scans entire project structure
    - Analyzes:
      - Implemented features and components
      - API endpoints and integrations
      - Database schemas
-     - Testing coverage (X tests passing)
+     - Testing coverage
      - Recent changes and additions
      - Environment variables required
      - Dependencies added/removed
 
 3. **Documentation Update Phase**
 
-   **For each documentation file, Claude updates:**
-
-   **`CLAUDE.md`** (Claude Code assistant instructions):
+   Updates relevant documentation files:
    - Project structure and key files
    - Architecture decisions
    - Development guidelines
    - Important patterns and conventions
-   - Integration details (Valu/ChabadUniverse)
    - Current implementation status
-
-   **`README.md`** (Project overview):
-   - Project description and purpose
-   - Current tech stack
    - Getting started instructions
-   - Available npm scripts
-   - Project structure tree
-   - Development workflow
-
-   **`QUICKSTART.md`** (Rapid setup guide):
-   - Quick setup instructions
-   - Environment variable configuration
-   - Common development tasks
-   - Testing commands
-
-   **`ARCHITECTURE.md`** (System design):
-   - Component architecture
-   - Data flow diagrams
-   - Integration points
-   - Design patterns used
-
-   **`DECISIONS.md`** (Technical decisions log):
-   - Architectural decisions made
-   - Technology choices with rationale
-   - Trade-offs considered
-
-   **`API_SPECIFICATION.md`** (API documentation):
-   - Endpoint listings
-   - Request/response formats
-   - Authentication details
-
-   **`DEPLOYMENT.md`** (Deployment guide):
-   - Deployment process
-   - Environment configuration
-   - Production considerations
-
-   **And many more files...**
+   - Available scripts
+   - Feature lists
 
 4. **Consistency Verification**
    - Ensures matching information across all docs
@@ -679,17 +563,16 @@ Keep all project documentation in sync with the codebase automatically.
    ✅ Documentation Update Complete
 
    Updated files:
-   - CLAUDE.md: Added scraper implementation details
-   - README.md: Updated project structure and dependencies
-   - ARCHITECTURE.md: Added scraper module to architecture diagram
-   - API_SPECIFICATION.md: No changes needed
-   - DEPLOYMENT.md: Added ARCHIVE_BASE_URL environment variable
+   - CLAUDE.md: Added authentication implementation details
+   - README.md: Updated features and dependencies
+   - ARCHITECTURE.md: Added auth module to architecture
+   - API_SPECIFICATION.md: Added new endpoints
 
    Discovered changes:
-   - 8 new files added to lib/scraper/
-   - 1 new dependency: cheerio@^1.0.0-rc.12
-   - 1 new environment variable: ARCHIVE_BASE_URL
-   - 15 new tests added (98% coverage maintained)
+   - 5 new files added
+   - 2 new dependencies
+   - 1 new environment variable
+   - 15 new tests added
 
    ⚠️ Changes not committed automatically - review before committing
    ```
@@ -700,7 +583,7 @@ Keep all project documentation in sync with the codebase automatically.
 
 ```bash
 git diff docs/
-git diff CLAUDE.md README.md
+git diff *.md
 ```
 
 **What to check:**
@@ -754,33 +637,19 @@ Development → /session-end → /update-docs → Review → /save → PR
 Claude runs comprehensive checks BEFORE committing:
 
 **1. Run Tests**
-```bash
-npm test
-```
 - All tests must pass
 - No regression issues
 - New tests for new features
 
 **2. Run Linter**
-```bash
-npm run lint
-```
-- No ESLint errors
-- No TypeScript errors
+- No linting errors
+- No type errors (if using TypeScript)
 - Code style compliance
 
 **3. Run Build**
-```bash
-npm run build
-```
 - Build must succeed
 - No compilation errors
 - Production bundle valid
-
-**4. Generate Documentation** (if applicable)
-```bash
-npm run docs  # If configured
-```
 
 **If ANY check fails:**
 - Claude reports the error
@@ -791,13 +660,13 @@ npm run docs  # If configured
 ```
 ❌ Pre-commit check failed: Tests
 
-FAIL  __tests__/scraper/archive.test.ts
-  ● Archive Scraper › should handle network errors
+FAIL  auth.test.js
+  ● Authentication › should hash passwords
 
-    expect(received).rejects.toThrow()
+    expect(received).toBe(expected)
 
-    Expected: Error
-    Received: undefined
+    Expected: true
+    Received: false
 
 Tests failed. Would you like me to fix the failing tests before committing?
 ```
@@ -810,11 +679,7 @@ git status
 ```
 
 **Stage all relevant files:**
-```bash
-git add lib/scraper/archive.ts lib/scraper/parser.ts ...
-```
-
-**Claude intelligently stages:**
+Claude intelligently stages:
 - Source code changes
 - Test files
 - Configuration updates
@@ -835,11 +700,6 @@ Do you want to proceed? (yes/no)
 
 #### 6.4 Analyze Changes
 
-**Review staged changes:**
-```bash
-git diff --cached
-```
-
 Claude analyzes:
 - What files changed
 - What functionality added/modified
@@ -849,13 +709,12 @@ Claude analyzes:
 **Example analysis output:**
 ```
 Analyzing changes:
-- Added archive scraper implementation (456 lines)
-- Created HTML parser utilities (123 lines)
-- Added 15 unit tests with mocks
-- Updated package.json with cheerio dependency
-- Added TypeScript types for Archive interface
-- Updated CLAUDE.md with scraper details
-- Updated README.md with new dependency
+- Added authentication system (456 lines)
+- Created user model and auth endpoints
+- Added 15 unit tests
+- Updated configuration
+- Added TypeScript types
+- Updated documentation
 ```
 
 #### 6.5 Create Commit Message
@@ -866,28 +725,27 @@ Format: `{emoji} {type}: {description}`
 
 **Example:**
 ```
-✨ feat: Implement newsletter archive scraper with S3 integration
+✨ feat: Implement user authentication system
 
-Add comprehensive archive scraping functionality with:
-- S3 archive fetching with retry logic and exponential backoff
-- HTML parsing using cheerio to extract newsletter links
-- Metadata extraction (date, parsha, year) from archive entries
-- Pagination support for large archives
-- Error handling for network failures and invalid HTML
-- 15 unit tests with 98% coverage
+Add comprehensive authentication with:
+- User registration with email validation
+- Login with bcrypt password hashing
+- JWT token generation and validation
+- Password reset functionality
+- Rate limiting for security
+- 15 unit tests with 95% coverage
 
 Dependencies added:
-- cheerio@^1.0.0-rc.12 for HTML parsing
-- @types/cheerio@^0.22.35 for TypeScript support
+- bcrypt for password hashing
+- jsonwebtoken for JWT handling
 
 Configuration:
-- Added ARCHIVE_BASE_URL environment variable
-- Updated S3 bucket CORS policy for development
+- Added JWT_SECRET environment variable
+- Added token expiration settings
 
 Documentation:
-- Updated CLAUDE.md with scraper implementation details
-- Updated README.md with new dependency and structure
-- Updated ARCHITECTURE.md with scraper module
+- Updated API specification
+- Added authentication guide
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -903,7 +761,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 I propose the following commit message:
 
-✨ feat: Implement newsletter archive scraper with S3 integration
+✨ feat: Implement user authentication system
 
 [... full message ...]
 
@@ -922,7 +780,7 @@ Do you approve this commit message? (yes/no)
 **After approval, Claude commits:**
 ```bash
 git commit -m "$(cat <<'EOF'
-✨ feat: Implement newsletter archive scraper with S3 integration
+✨ feat: Implement user authentication system
 ...
 EOF
 )"
@@ -932,18 +790,12 @@ EOF
 ```
 husky - pre-commit hook running...
 [STARTED] Running tasks for staged files...
-[STARTED] **/*.{ts,tsx} — 8 files
-[STARTED] eslint --fix
-[STARTED] prettier --write
-[COMPLETED] prettier --write
-[COMPLETED] eslint --fix
-[COMPLETED] **/*.{ts,tsx} — 8 files
-[COMPLETED] Running tasks for staged files...
+[COMPLETED] All tasks passed
 ```
 
 **Commit created:**
 ```
-[feat/implement-newsletter-archive-scraper a1b2c3d] ✨ feat: Implement newsletter archive scraper
+[feat/implement-user-authentication a1b2c3d] ✨ feat: Implement user authentication
  8 files changed, 456 insertions(+), 12 deletions(-)
 ```
 
@@ -951,17 +803,7 @@ husky - pre-commit hook running...
 
 **Push branch to origin:**
 ```bash
-git push -u origin feat/implement-newsletter-archive-scraper
-```
-
-**Output:**
-```
-To github.com:your-org/your-repo.git
- * [new branch]      feat/implement-newsletter-archive-scraper -> feat/implement-newsletter-archive-scraper
-Branch 'feat/implement-newsletter-archive-scraper' set up to track remote branch 'feat/implement-newsletter-archive-scraper' from 'origin'.
-
-remote: Create a pull request for 'feat/implement-newsletter-archive-scraper' on GitHub by visiting:
-remote:      https://github.com/your-org/your-repo/pull/new/feat/implement-newsletter-archive-scraper
+git push -u origin feat/implement-user-authentication
 ```
 
 #### 6.9 Prompt for Pull Request
@@ -969,7 +811,7 @@ remote:      https://github.com/your-org/your-repo/pull/new/feat/implement-newsl
 ```
 ✅ Changes committed and pushed successfully!
 
-Commit: a1b2c3d - ✨ feat: Implement newsletter archive scraper
+Commit: a1b2c3d - ✨ feat: Implement user authentication
 
 Would you like to create a pull request for these changes?
 ```
@@ -1004,90 +846,58 @@ git log origin/main..HEAD --oneline
 git diff origin/main...HEAD
 ```
 
-**Example output:**
-```
-Commits in this branch:
-a1b2c3d ✨ feat: Implement newsletter archive scraper
-
-Files changed:
-- lib/scraper/archive.ts (new)
-- lib/scraper/parser.ts (new)
-- lib/scraper/types.ts (new)
-- __tests__/scraper/archive.test.ts (new)
-- package.json (modified)
-- lib/scraper/index.ts (modified)
-- lib/utils/retry.ts (new)
-- types/newsletter.ts (modified)
-- CLAUDE.md (modified)
-- README.md (modified)
-```
-
 #### 7.3 Create PR with Summary
 
 **Claude creates comprehensive PR:**
 
 ```bash
 gh pr create \
-  --title "✨ feat: Implement newsletter archive scraper with S3 integration" \
+  --title "✨ feat: Implement user authentication system" \
   --body "$(cat <<'EOF'
 ## Summary
-- Implemented archive scraping functionality for S3-hosted newsletters
-- Added HTML parsing with cheerio to extract newsletter links and metadata
-- Created retry logic with exponential backoff for network resilience
-- Implemented comprehensive error handling for edge cases
-- Added 15 unit tests achieving 98% code coverage
-- Updated all project documentation to reflect changes
+- Implemented complete authentication system
+- Added user registration and login
+- Created password reset functionality
+- Implemented JWT token handling
+- Added rate limiting for security
+- Wrote 15 unit tests with 95% coverage
 
 ## Technical Details
 
-### New Modules
-- `lib/scraper/archive.ts` - Main archive scraper with S3 integration
-- `lib/scraper/parser.ts` - HTML parsing utilities using cheerio
-- `lib/scraper/types.ts` - TypeScript interfaces for scraper
-- `lib/utils/retry.ts` - Reusable retry logic with exponential backoff
+### New Features
+- User registration with email validation
+- Secure login with bcrypt hashing
+- JWT token generation and validation
+- Password reset via email
+- Rate limiting on auth endpoints
 
-### Features
-- Fetch archive HTML from S3 bucket
-- Parse newsletter links with metadata (date, parsha, year)
-- Support pagination for large archives
-- Validate and sanitize URLs
-- Handle Hebrew/RTL text with UTF-8 encoding
-- Comprehensive error logging
+### Testing
+- 15 unit tests covering all auth flows
+- Integration tests for API endpoints
+- 95% code coverage achieved
 
-### Dependencies Added
-- `cheerio@^1.0.0-rc.12` - HTML parsing
-- `@types/cheerio@^0.22.35` - TypeScript types
-
-### Configuration Changes
-- Added `ARCHIVE_BASE_URL` environment variable
-- Updated S3 bucket CORS policy for development environment
-
-### Documentation Updates
-- Updated `CLAUDE.md` with scraper implementation details
-- Updated `README.md` with new dependencies and structure
-- Updated `ARCHITECTURE.md` with scraper module diagram
-- Updated `DEPLOYMENT.md` with new environment variable
+### Configuration
+- JWT_SECRET environment variable required
+- Token expiration configurable
 
 ## Test Plan
-- [x] All unit tests pass (15 tests, 98% coverage)
+- [x] All unit tests pass
 - [x] Linting passes with no errors
 - [x] Build succeeds
-- [ ] Manual testing: Fetch actual archive from S3
-- [ ] Manual testing: Verify newsletter link extraction
-- [ ] Manual testing: Test retry logic with network failures
-- [ ] Manual testing: Validate metadata extraction accuracy
-- [ ] Manual testing: Test with archives containing Hebrew text
-- [ ] Integration testing: End-to-end scraping workflow
-- [ ] Edge case testing: Malformed HTML handling
-- [ ] Edge case testing: Missing metadata scenarios
+- [ ] Manual testing: User registration
+- [ ] Manual testing: Login flow
+- [ ] Manual testing: Password reset
+- [ ] Manual testing: Token expiration
+- [ ] Edge case: Invalid credentials
+- [ ] Edge case: Rate limiting
 
 ## Breaking Changes
 None - this is new functionality.
 
 ## Deployment Notes
-- Ensure `ARCHIVE_BASE_URL` is set in production environment
-- Verify S3 bucket CORS configuration allows production domain
-- Monitor S3 request rate to avoid throttling
+- Set JWT_SECRET in production
+- Configure email service for password reset
+- Monitor rate limiting thresholds
 
 ## Related Issues
 Closes #42
@@ -1107,16 +917,8 @@ https://github.com/your-org/your-repo/pull/27
 ```
 ✅ Pull request created successfully!
 
-PR #27: ✨ feat: Implement newsletter archive scraper with S3 integration
+PR #27: ✨ feat: Implement user authentication system
 URL: https://github.com/your-org/your-repo/pull/27
-
-The PR includes:
-- Comprehensive summary of changes
-- Technical details and architecture
-- Complete test plan with checkboxes
-- Documentation updates listed
-- Deployment notes and considerations
-- Links to related issues
 
 You can now review and merge the PR when ready!
 ```
@@ -1137,19 +939,8 @@ checkout main and pull
 # Checkout main branch
 git checkout main
 
-# Pull latest changes (including merged PR)
+# Pull latest changes
 git pull origin main
-```
-
-**Output:**
-```
-Switched to branch 'main'
-Your branch is behind 'origin/main' by 1 commit.
-Updating a1b2c3d..c3d4e5f
-Fast-forward
- lib/scraper/archive.ts | 123 +++++++++++++++++++++++++++++++++++
- ...
- 10 files changed, 567 insertions(+), 12 deletions(-)
 ```
 
 #### 8.2 Ready for Next Issue
@@ -1169,7 +960,7 @@ One of the most powerful aspects of this workflow is that it's **completely self
 
 ### Documentation Layers
 
-The workflow creates multiple layers of documentation, each serving a different purpose:
+The workflow creates multiple layers of documentation:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -1218,27 +1009,13 @@ The workflow creates multiple layers of documentation, each serving a different 
 - 📚 **Knowledge transfer** - Onboard new developers quickly
 - ⏱️ **Time tracking** - Understand how long tasks actually take
 
-**Example from session file:**
-```markdown
-## Problems Encountered and Solutions
-- **Problem**: S3 CORS errors in development
-  - **Solution**: Added CORS configuration to S3 bucket for localhost
-  - **Why it worked**: Localhost wasn't in allowed origins
-  - **Time spent**: 15 minutes debugging
-
-## Lessons Learned
-- Always handle Hebrew/RTL text with explicit UTF-8 encoding
-- S3 CORS must be configured for development environment
-- Exponential backoff prevents overwhelming S3 on failures
-```
-
 **Searchable history:**
 ```bash
-# Find all sessions about scraping
-grep -r "scraper" .claude/sessions/
+# Find all sessions about specific topic
+grep -r "authentication" .claude/sessions/
 
 # Find sessions with specific problem
-grep -r "CORS" .claude/sessions/
+grep -r "race condition" .claude/sessions/
 
 # List recent sessions
 ls -lt .claude/sessions/ | head -10
@@ -1250,59 +1027,11 @@ ls -lt .claude/sessions/ | head -10
 
 **Managed by:** `/update-docs` command
 
-**Files updated automatically:**
-- `CLAUDE.md` - Project guidance for Claude
-- `README.md` - Project overview
-- `QUICKSTART.md` - Quick start guide
-- `ARCHITECTURE.md` - System architecture
-- `API_SPECIFICATION.md` - API documentation
-- `DEPLOYMENT.md` - Deployment guide
-- And many more...
-
-**How `/update-docs` keeps documentation current:**
-
-1. **Scans entire codebase:**
-   ```bash
-   components/**/*.tsx    # Find all components
-   app/api/**/*.ts        # Find all API routes
-   lib/**/*.ts            # Find all utilities
-   __tests__/**/*.ts      # Count tests
-   package.json           # Check dependencies
-   ```
-
-2. **Extracts current state:**
-   - Implemented features
-   - Component structure
-   - API endpoints
-   - Database models
-   - Test coverage
-   - Dependencies
-   - Environment variables
-
-3. **Updates documentation intelligently:**
-   - Adds new features to lists
-   - Updates version numbers
-   - Synchronizes dependency lists
-   - Maintains consistent information
-   - Preserves manual content
-
-**Example update:**
-
-**Before `/update-docs`:**
-```markdown
-## Features
-- User authentication
-- Newsletter display
-```
-
-**After `/update-docs`:**
-```markdown
-## Features
-- User authentication
-- Newsletter display
-- Archive scraping from S3 ✨ NEW
-- Metadata extraction (date, parsha, year) ✨ NEW
-```
+**How it stays current:**
+1. Scans entire codebase
+2. Extracts current state
+3. Updates documentation intelligently
+4. Preserves manual content
 
 **Benefits:**
 - ✅ **Always current** - Docs never drift from code
@@ -1324,46 +1053,10 @@ ls -lt .claude/sessions/ | head -10
 
 {explanation of WHY it changed}
 
-{additional context: dependencies, breaking changes, etc.}
+{additional context}
 
 🤖 Generated with Claude Code
 Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-**Example:**
-```
-✨ feat: Implement newsletter archive scraper with S3 integration
-
-Add comprehensive archive scraping functionality to fetch and parse
-newsletter archives from S3. This enables the admin tool to discover
-available newsletters without manual entry.
-
-Implementation includes:
-- S3 fetching with retry logic
-- HTML parsing with cheerio
-- Metadata extraction
-- 15 unit tests (98% coverage)
-
-Dependencies: cheerio@^1.0.0-rc.12
-Environment: ARCHIVE_BASE_URL required
-```
-
-**Why this matters:**
-
-**Good commit message:**
-```
-✨ feat: Add caching layer to reduce API calls
-
-Added Redis caching for newsletter data to reduce API calls by ~80%.
-Cache TTL set to 5 minutes based on content update frequency.
-
-Rationale: API rate limits were being hit during peak usage.
-Testing: Load tested with 1000 concurrent users.
-```
-
-**Bad commit message:**
-```
-fix stuff
 ```
 
 **Benefits:**
@@ -1376,48 +1069,13 @@ fix stuff
 
 **Purpose:** Comprehensive change summary with review checklist
 
-**Created by:** Claude Code during PR creation
-
 **Includes:**
-- **Summary** - High-level bullet points
-- **Technical Details** - Implementation specifics
-- **Test Plan** - Manual and automated tests
-- **Breaking Changes** - Backward compatibility notes
-- **Deployment Notes** - Production considerations
-- **Related Issues** - Links to GitHub issues
-
-**Example PR description:**
-```markdown
-## Summary
-- Implemented archive scraping for S3-hosted newsletters
-- Added 15 unit tests with 98% coverage
-- Updated all project documentation
-
-## Technical Details
-### New Modules
-- `lib/scraper/archive.ts` - S3 integration
-- `lib/scraper/parser.ts` - HTML parsing
-
-### Dependencies Added
-- cheerio@^1.0.0-rc.12
-
-### Documentation Updates
-- CLAUDE.md - Implementation details
-- README.md - Dependency updates
-- ARCHITECTURE.md - Module diagram
-
-## Test Plan
-- [x] Unit tests pass (automated)
-- [x] Linting passes (automated)
-- [x] Build succeeds (automated)
-- [ ] Manual: Test with real S3 archive
-- [ ] Manual: Verify Hebrew text handling
-- [ ] Edge case: Malformed HTML
-
-## Deployment Notes
-- Set ARCHIVE_BASE_URL in production
-- Verify S3 CORS configuration
-```
+- Summary (high-level bullet points)
+- Technical Details (implementation specifics)
+- Test Plan (manual and automated tests)
+- Breaking Changes (backward compatibility notes)
+- Deployment Notes (production considerations)
+- Related Issues (links to GitHub issues)
 
 **Benefits:**
 - ✅ **Complete review context** - Reviewers understand everything
@@ -1429,36 +1087,23 @@ fix stuff
 
 **Purpose:** Permanent, immutable record
 
-**What's preserved:**
-- Every code change
-- Every commit message
-- Every session file
-- Every documentation update
-- Branch history
-- Merge history
-
 **Powerful searching:**
 
 ```bash
 # Find when feature was added
-git log --grep="archive scraper"
+git log --grep="authentication"
 
 # Find who changed a file
-git log --follow lib/scraper/archive.ts
+git log --follow path/to/file
 
 # Find what changed in a date range
-git log --since="2025-11-01" --until="2025-11-05"
-
-# Find commits by author
-git log --author="Claude"
+git log --since="2025-11-01" --until="2025-11-30"
 
 # Search commit diffs
-git log -S "cheerio" --source --all
+git log -S "function_name" --source --all
 ```
 
 ### The Self-Documenting Cycle
-
-**How it all works together:**
 
 ```
 1. Start Session (/session-start)
@@ -1471,47 +1116,24 @@ git log -S "cheerio" --source --all
    ↓
 3. End Session (/session-end)
    ↓
-   Comprehensive summary appended to session file
+   Comprehensive summary appended
    ↓
 4. Update Documentation (/update-docs)
    ↓
-   All project docs synchronized with code
+   All project docs synchronized
    ↓
 5. Commit (/save)
    ↓
-   Detailed commit message captures "what" and "why"
+   Detailed commit message
    ↓
 6. Create PR (pr)
    ↓
-   Comprehensive PR description with test plan
+   Comprehensive PR description
    ↓
 7. Merge
    ↓
    Everything preserved in git history
 ```
-
-### Finding Information Later
-
-**Question:** "Why did we choose cheerio instead of jsdom?"
-
-**Answer found in:**
-1. **Session file** - Decision discussion and rationale
-2. **Commit message** - "Using cheerio for lightweight parsing"
-3. **CLAUDE.md** - Updated with library choice
-
-**Question:** "How do we handle Hebrew text encoding?"
-
-**Answer found in:**
-1. **Session file** - "Problem: Hebrew encoding issues, Solution: UTF-8"
-2. **Code comments** - Added during implementation
-3. **README.md** - Listed in features
-
-**Question:** "When did we add S3 integration?"
-
-**Answer found in:**
-1. **Git log** - `git log --grep="S3"`
-2. **Session files** - Search for "S3"
-3. **ARCHITECTURE.md** - Updated with S3 module
 
 ### Zero-Effort Knowledge Base
 
@@ -1522,122 +1144,6 @@ git log -S "cheerio" --source --all
 - ✅ **No manual changelog writing**
 - ✅ **No deployment note docs**
 - ✅ **Everything auto-documented**
-
-**Examples of automatic documentation:**
-
-**Feature documentation:**
-```markdown
-# From session file → Copied to README.md via /update-docs
-## Archive Scraper
-Fetches newsletter archives from S3, parses HTML, extracts metadata.
-```
-
-**API documentation:**
-```markdown
-# From code analysis → Added to API_SPECIFICATION.md
-GET /api/archive
-Returns: { newsletters: Newsletter[], metadata: ArchiveMetadata }
-```
-
-**Deployment documentation:**
-```markdown
-# From commit message → Added to DEPLOYMENT.md
-Required environment variables:
-- ARCHIVE_BASE_URL (S3 bucket URL)
-```
-
-**Troubleshooting documentation:**
-```markdown
-# From session file "Problems Encountered" → Referenced in docs
-Common Issue: CORS errors in development
-Solution: Configure S3 bucket CORS for localhost
-```
-
-### Benefits for Teams
-
-**For current developers:**
-- 🎯 **Context switching** - Resume work quickly
-- 🧩 **Understanding decisions** - Know why code exists
-- 🐛 **Debugging** - Find when bugs were introduced
-
-**For new developers:**
-- 📚 **Onboarding** - Read session files to understand project
-- 🎓 **Learning** - See how problems were solved
-- 🗺️ **Navigation** - Understand codebase structure
-
-**For future maintenance:**
-- 🔍 **Code archaeology** - Understand legacy code
-- 📖 **Historical context** - Why was it done this way?
-- ⏪ **Safe changes** - Know impact of modifications
-
-### The Power of /update-docs
-
-**Before this workflow:**
-```
-Developer: Implements feature
-Developer: Manually updates README
-Developer: Forgets to update ARCHITECTURE.md
-Developer: Forgets to update DEPLOYMENT.md
-→ Docs drift out of sync
-→ New developers get confused
-→ Production deployment issues
-```
-
-**With this workflow:**
-```
-Developer: Implements feature
-Developer: /update-docs
-Claude: ✅ Updated 8 documentation files
-→ All docs stay in sync
-→ New developers have accurate info
-→ Production deployments smooth
-```
-
-**Example of automatic synchronization:**
-
-**You add a feature:**
-```typescript
-// lib/notifications/email.ts
-export async function sendNotification() {
-  // Send email notification
-}
-```
-
-**Run `/update-docs`:**
-
-**CLAUDE.md updated:**
-```markdown
-## Email Notifications
-Located in `lib/notifications/email.ts`
-Sends notifications when newsletters are processed
-```
-
-**README.md updated:**
-```markdown
-## Features
-- Email notifications when processing complete
-```
-
-**ARCHITECTURE.md updated:**
-```markdown
-[Diagram updated to include Email Notification module]
-```
-
-**DEPLOYMENT.md updated:**
-```markdown
-Required environment variables:
-- SMTP_HOST
-- SMTP_USER
-- SMTP_PASS
-```
-
-**API_SPECIFICATION.md updated:**
-```markdown
-POST /api/notifications/email
-Triggers email notification
-```
-
-**All automatically, in one command!**
 
 ---
 
@@ -1671,7 +1177,7 @@ Triggers email notification
 - **Manually edit auto-generated sections** - they'll be overwritten
 - **Skip `/update-docs`** - docs will drift
 - **Commit without reviewing docs** - verify accuracy
-- **Forget to add new env vars** to `.env.example`
+- **Forget to add new env vars** to configuration
 
 ### Task Management with TodoWrite
 
@@ -1702,9 +1208,9 @@ Triggers email notification
 ```
 Please use parallel agents to:
 1. Search for all API endpoint definitions
-2. Find authentication middleware usage
-3. Locate error handling patterns
-4. Identify database query patterns
+2. Find existing implementations
+3. Locate test patterns
+4. Identify configuration patterns
 ```
 
 **Benefits:**
@@ -1729,7 +1235,7 @@ Please use parallel agents to:
 - ✅ Linting passes
 - ✅ Build succeeds
 - ✅ Documentation updated (via `/update-docs`)
-- ✅ No sensitive data (`.env`, credentials)
+- ✅ No sensitive data (credentials, API keys)
 
 #### Atomic Commits
 
@@ -1742,46 +1248,15 @@ Please use parallel agents to:
 
 **Example of GOOD atomic commits:**
 ```
-✨ feat: Add user authentication endpoints
-✅ test: Add authentication endpoint tests
-📝 docs: Update documentation for authentication
+✨ feat: Add user authentication
+✅ test: Add authentication tests
+📝 docs: Update documentation for auth
 ```
 
 **Example of BAD non-atomic commit:**
 ```
 🔧 chore: Various updates and fixes
 // Multiple unrelated changes mixed together
-```
-
-#### Commit Message Format
-
-**Structure:**
-```
-{emoji} {type}: {short description}
-
-{detailed description explaining WHY}
-
-{additional context}
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-**Example:**
-```
-✨ feat: Add newsletter metadata extraction
-
-Implement metadata parser to extract date, parsha, and year from
-newsletter HTML. This enables proper categorization and searching
-of newsletters in the admin interface.
-
-Uses cheerio for reliable HTML parsing instead of regex.
-Supports multiple date formats found in historical archives.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ### Pull Request Best Practices
@@ -1805,11 +1280,11 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - [x] Unit tests pass (automated)
 - [x] Linting passes (automated)
 - [x] Build succeeds (automated)
-- [ ] Manual: Test user login flow
-- [ ] Manual: Verify error messages display correctly
-- [ ] Manual: Test on mobile viewport
-- [ ] Edge case: Test with invalid credentials
-- [ ] Edge case: Test with expired session
+- [ ] Manual: Test user registration
+- [ ] Manual: Test login flow
+- [ ] Manual: Test error handling
+- [ ] Edge case: Invalid input
+- [ ] Edge case: Network errors
 ```
 
 #### PR Size
@@ -1849,16 +1324,9 @@ Execute the test suite and report results.
 If tests fail, offer to debug and fix them.
 ```
 
-**Using the command:**
-```bash
-/test scraper
-```
-
 ### Session Update Command
 
 **Purpose:** Document progress during long sessions
-
-**Location:** `.claude/commands/session-update.md`
 
 **Usage:**
 ```bash
@@ -1940,7 +1408,7 @@ If tests fail, offer to debug and fix them.
 
 5. **Link sessions in documentation:**
    ```markdown
-   Continues from: 2025-11-05-1430-feature-name-part-1.md
+   Continues from: YYYY-MM-DD-HHMM-feature-name-part-1.md
    ```
 
 ---
@@ -1952,7 +1420,7 @@ If tests fail, offer to debug and fix them.
 **Symptom:**
 ```
 ❌ Pre-commit check failed: Tests
-FAIL  __tests__/feature.test.ts
+FAIL  test-file.js
 ```
 
 **Solutions:**
@@ -1987,19 +1455,17 @@ Claude keeps asking for approval even after you said yes.
 **Symptom:**
 ```
 Branch name exceeds 62 characters:
-feat/implement-comprehensive-newsletter-archive-scraping-with-metadata
+feat/implement-comprehensive-authentication-system-with-oauth
 ```
 
 **Solution:**
 Claude suggests shorter alternatives:
 ```
-1. feat/newsletter-archive-scraper
-2. feat/archive-scraping
-3. feat/newsletter-scraper
+1. feat/authentication-system
+2. feat/auth-with-oauth
+3. feat/user-auth
 4. [Enter custom name]
 ```
-
-Choose one or provide your own.
 
 ### Issue: Forgot to Start Session
 
@@ -2046,13 +1512,12 @@ Created PR but docs are out of sync.
 4. **Review and commit doc updates:**
    ```bash
    /save
-   # Commit message: "📝 docs: Update documentation for [feature]"
+   # Commit message: "📝 docs: Update documentation"
    ```
 
 5. **Push to PR:**
    ```bash
    git push
-   # PR automatically updates
    ```
 
 ### Issue: Documentation Changed Incorrectly
@@ -2064,13 +1529,10 @@ Created PR but docs are out of sync.
 
 1. **Review changes before committing:**
    ```bash
-   git diff CLAUDE.md README.md
+   git diff *.md
    ```
 
-2. **Manually fix incorrect sections:**
-   ```bash
-   # Edit the file
-   ```
+2. **Manually fix incorrect sections**
 
 3. **Mark sections as "manual" to preserve:**
    ```markdown
@@ -2081,32 +1543,19 @@ Created PR but docs are out of sync.
 
 4. **Commit the corrected version**
 
-### Issue: Session File Lost
-
-**Symptom:**
-Closed session file accidentally.
-
-**Solution:**
-Session files are never deleted! Find them in:
-```
-.claude/sessions/YYYY-MM-DD-HHMM-session-name.md
-```
-
-All session history is preserved.
-
 ### Issue: Merge Conflicts
 
 **Symptom:**
 ```
-Auto-merging file.ts
-CONFLICT (content): Merge conflict in file.ts
+Auto-merging file.js
+CONFLICT (content): Merge conflict in file.js
 ```
 
 **Solution:**
 
 1. **Ask Claude for help:**
    ```
-   "Please help me resolve the merge conflicts in file.ts"
+   "Please help me resolve the merge conflicts"
    ```
 
 2. **Claude will:**
@@ -2124,14 +1573,7 @@ Hooks take 5+ minutes on large codebases.
 
 **Solution:**
 
-1. **Optimize hooks** (run only on staged files):
-   ```javascript
-   // lint-staged config
-   {
-     "*.ts": ["eslint --fix", "prettier --write"],
-     // Don't run tests on every commit
-   }
-   ```
+1. **Optimize hooks** (run only on staged files)
 
 2. **Use --no-verify sparingly:**
    ```bash
@@ -2163,8 +1605,6 @@ Hooks take 5+ minutes on large codebases.
    ```bash
    echo ".env" >> .gitignore
    ```
-
-4. **Commit .gitignore update**
 
 ---
 
@@ -2213,16 +1653,16 @@ checkout main and pull
 
 ### Commit Type Reference
 
-| Emoji | Type | When to Use | Example |
-|-------|------|-------------|---------|
-| ✨ | `feat` | New feature | Adding user authentication |
-| 🐛 | `fix` | Bug fix | Fixing login redirect |
-| ♻️ | `refactor` | Code refactor | Extracting shared utility |
-| 📝 | `docs` | Documentation | Updating README |
-| ✅ | `test` | Tests | Adding unit tests |
-| ⚡️ | `perf` | Performance | Optimizing query |
-| 💄 | `style` | Code style | Formatting code |
-| 🔧 | `chore` | Tooling/config | Updating ESLint rules |
+| Emoji | Type | When to Use |
+|-------|------|-------------|
+| ✨ | `feat` | New feature |
+| 🐛 | `fix` | Bug fix |
+| ♻️ | `refactor` | Code refactor |
+| 📝 | `docs` | Documentation |
+| ✅ | `test` | Tests |
+| ⚡️ | `perf` | Performance |
+| 💄 | `style` | Code style |
+| 🔧 | `chore` | Tooling/config |
 
 ### Todo Status Reference
 
@@ -2247,8 +1687,7 @@ checkout main and pull
     └── YYYY-MM-DD-HHMM-*.md  # Session files (never deleted)
 
 docs/                          # Project documentation
-├── CLAUDE-CODE-WORKFLOW.md   # This guide
-└── [other docs]              # Auto-updated by /update-docs
+└── [documentation files]      # Auto-updated by /update-docs
 
 CLAUDE.md                      # Project guidance for Claude
 README.md                      # Project README
@@ -2276,7 +1715,7 @@ cat .claude/sessions/.current-session
 
 **Manually set session:**
 ```bash
-echo "2025-11-05-1430-session-name.md" > .claude/sessions/.current-session
+echo "YYYY-MM-DD-HHMM-session-name.md" > .claude/sessions/.current-session
 ```
 
 ### Git Issues
@@ -2305,7 +1744,7 @@ git pull
 
 **Undo documentation changes:**
 ```bash
-git checkout -- CLAUDE.md README.md  # Restore specific files
+git checkout -- *.md  # Restore all markdown files
 ```
 
 **Force documentation rebuild:**
@@ -2419,168 +1858,79 @@ Issue → Session → Code → Test → End → Docs → Commit → PR → Merge
 
 ## Appendix: Sample Session File
 
-**Complete example:** `.claude/sessions/2025-11-05-1430-Add-user-authentication.md`
+**Complete example:** `.claude/sessions/YYYY-MM-DD-HHMM-implement-feature.md`
 
 ```markdown
-# Add user authentication - 2025-11-05 14:30
+# Implement feature - YYYY-MM-DD HH:MM
 
 ## Session Overview
-- **Started**: 2025-11-05 14:30
-- **Git Branch**: `feat/add-user-authentication`
+- **Started**: YYYY-MM-DD HH:MM
+- **Git Branch**: `feat/implement-feature`
 
 ## Goals
-- Implement JWT-based authentication
-- Add login/logout endpoints
-- Create authentication middleware
-- Add session management
+- Implement core functionality
+- Add comprehensive tests
+- Update documentation
+- Ensure performance
 
 ## Progress
-- [x] Research authentication libraries
-- [x] Install and configure passport.js
-- [x] Create user model with password hashing
-- [x] Implement login endpoint
-- [x] Implement logout endpoint
-- [x] Create authentication middleware
-- [x] Add session management
+- [x] Research existing patterns
+- [x] Create implementation plan
+- [x] Implement core logic
 - [x] Write unit tests
-- [x] Write integration tests
-- [ ] Add rate limiting (moved to separate issue)
+- [x] Add integration tests
+- [x] Update documentation
 
 ## Notes
-- Using passport.js with JWT strategy
-- Bcrypt for password hashing (cost factor: 12)
-- JWT expiration: 24 hours
-- Refresh token expiration: 30 days
+- Using established patterns from codebase
+- Performance considerations addressed
+- Edge cases handled
 
-## Progress Update - 15:30
-- ✅ Completed authentication endpoints
-- ✅ Middleware working correctly
-- 🔄 Writing tests (8/12 complete)
-- 📝 Found edge case: handling expired refresh tokens
-
-## Progress Update - 16:15
-- ✅ All tests complete (12/12 passing)
-- ✅ Added rate limiting for login endpoint
-- 📝 Decided to split rate limiting into separate PR for clarity
+## Progress Update - HH:MM
+- ✅ Core implementation complete
+- ✅ Tests passing (25/25)
+- 📝 Found optimization opportunity
+- ⚠️ Note: Consider caching for production
 
 ---
 
 ## Session Summary
-**Ended**: 2025-11-05 16:45
-**Duration**: 2 hours 15 minutes
+**Ended**: YYYY-MM-DD HH:MM
+**Duration**: X hours Y minutes
 
 ### Git Summary
-- **Total files changed**: 12 files
-  - Added: `lib/auth/jwt.ts` (JWT utilities)
-  - Added: `lib/auth/middleware.ts` (Auth middleware)
-  - Added: `models/User.ts` (User model with bcrypt)
-  - Added: `app/api/auth/login/route.ts` (Login endpoint)
-  - Added: `app/api/auth/logout/route.ts` (Logout endpoint)
-  - Added: `app/api/auth/refresh/route.ts` (Token refresh)
-  - Added: `__tests__/auth/jwt.test.ts` (JWT tests)
-  - Added: `__tests__/auth/middleware.test.ts` (Middleware tests)
-  - Added: `__tests__/api/auth.test.ts` (Integration tests)
-  - Modified: `package.json` (Added dependencies)
-  - Modified: `lib/db/index.ts` (Added User model)
-  - Added: `.env.example` (Added JWT_SECRET example)
-- **Lines changed**: 847 insertions, 23 deletions
-- **Commits made**: 0 (changes not yet committed)
-- **Final status**: Changes staged but not committed
-- **Branch**: `feat/add-user-authentication`
+- **Total files changed**: N files
+  - Added: [new files]
+  - Modified: [changed files]
+- **Lines changed**: XXX insertions, YY deletions
+- **Commits made**: N
+- **Branch**: `feat/implement-feature`
 
 ### Todo Summary
-- **Total tasks**: 9
-- **Completed tasks**: 8/9 (89%)
-  1. ✅ Research authentication libraries
-  2. ✅ Install and configure passport.js
-  3. ✅ Create user model with password hashing
-  4. ✅ Implement login endpoint
-  5. ✅ Implement logout endpoint
-  6. ✅ Create authentication middleware
-  7. ✅ Add session management
-  8. ✅ Write unit tests
-  9. ✅ Write integration tests
-- **Incomplete tasks**:
-  - Rate limiting (moved to Issue #45)
+- **Total tasks**: 6
+- **Completed tasks**: 6/6 (100%)
 
 ### Key Accomplishments
-- Implemented complete JWT authentication system
-- Created secure password hashing with bcrypt
-- Added authentication middleware for protected routes
-- Implemented refresh token mechanism
-- Wrote comprehensive test suite (12 tests, 95% coverage)
-- Properly handled edge cases (expired tokens, invalid credentials)
-
-### Features Implemented
-- User login with email/password
-- JWT token generation and validation
-- Refresh token mechanism for extended sessions
-- Logout functionality with token revocation
-- Authentication middleware for protected endpoints
-- Password hashing with bcrypt (cost factor 12)
-- Session management with secure cookies
+- Successfully implemented feature
+- Added comprehensive test coverage
+- Optimized for performance
+- Updated all documentation
 
 ### Problems Encountered and Solutions
-- **Problem**: Circular dependency between User model and auth utilities
-  - **Solution**: Restructured imports to break circular reference
-- **Problem**: Tests failing due to bcrypt timing
-  - **Solution**: Increased test timeout for password hashing tests
-- **Problem**: JWT secret not available in test environment
-  - **Solution**: Added test-specific .env.test file
-
-### Breaking Changes or Important Findings
-- **Breaking Change**: All protected routes now require authentication
-- **Security**: JWT_SECRET must be set in production (strong, random value)
-- **Migration**: Existing users need to reset passwords (no bcrypt hashes yet)
-
-### Dependencies Added/Removed
-- **Added**:
-  - `jsonwebtoken@^9.0.2` (JWT generation/validation)
-  - `bcrypt@^5.1.1` (Password hashing)
-  - `passport@^0.6.0` (Authentication framework)
-  - `passport-jwt@^4.0.1` (JWT strategy)
-  - `@types/jsonwebtoken@^9.0.5` (TypeScript types)
-  - `@types/bcrypt@^5.0.2` (TypeScript types)
-  - `@types/passport@^1.0.16` (TypeScript types)
-
-### Configuration Changes
-- Added `JWT_SECRET` to environment variables
-- Added `JWT_EXPIRATION` to environment variables (default: 24h)
-- Added `REFRESH_TOKEN_EXPIRATION` (default: 30d)
-- Updated .env.example with authentication variables
-
-### Deployment Steps Taken
-- None (local changes only)
-- **Required for production**:
-  - Set strong JWT_SECRET (use crypto.randomBytes(64))
-  - Configure secure cookie settings (httpOnly, secure, sameSite)
-  - Set up HTTPS for production
-  - Plan user migration for password hashing
+- **Problem**: Performance issue with large datasets
+  - **Solution**: Implemented caching strategy
+  - **Result**: 10x performance improvement
 
 ### Lessons Learned
-- JWT expiration should be configurable per environment
-- Bcrypt cost factor affects test performance (consider lower value for tests)
-- Refresh tokens need separate revocation mechanism
-- Rate limiting essential for login endpoints (added to Issue #45)
-- Cookie settings crucial for security (httpOnly, secure, sameSite)
-
-### What Wasn't Completed
-- Rate limiting for login endpoint (moved to Issue #45)
-- Email verification (separate epic)
-- Password reset flow (separate epic)
-- OAuth integration (future consideration)
+- Caching essential for large-scale operations
+- Early performance testing saves time
+- Documentation updates should happen alongside code
 
 ### Tips for Future Developers
-1. Always use HTTPS in production for authentication
-2. Test authentication middleware with expired/invalid tokens
-3. Set appropriate bcrypt cost factor (12 for production, 8 for tests)
-4. Use environment-specific JWT secrets (never commit real secrets!)
-5. Implement rate limiting to prevent brute force attacks
-6. Consider refresh token rotation for enhanced security
-7. Log authentication failures for security monitoring
-8. Use secure cookie settings (httpOnly, secure, sameSite: strict)
-9. Plan for token revocation mechanism in database
-10. Consider implementing "remember me" functionality carefully
+1. Test with production-scale data
+2. Consider caching early
+3. Monitor performance metrics
+4. Keep documentation in sync
 ```
 
 ---
@@ -2591,4 +1941,4 @@ This comprehensive guide documents a complete, self-documenting development work
 
 **Key Takeaway:** By following this workflow, your entire development process becomes a living knowledge base that grows automatically with every session, commit, and PR.
 
-For questions or suggestions, please contribute to this document!
+This guide is project-agnostic and can be used across all your development projects.
