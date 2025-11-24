@@ -5,17 +5,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Current Status**: Foundation Complete - Ready for HTML Processing Implementation
+**Current Status**: Phase 2 MVP Development - 1-2 Week Sprint
 
-This is an admin tool for ChabadUniverse channel administrators to process "Living with the Rebbe" newsletters before distribution. The application:
+This is an admin tool for ChabadUniverse channel administrators to process "Living with the Rebbe" newsletters before distribution.
+
+### Phase 2 MVP Scope
+The MVP focuses on delivering a functional HTML processing tool within 1-2 weeks:
+- **Core Function**: Process newsletter HTML and replace external resource URLs with CMS URLs
+- **Input**: Admin pastes HTML into textarea
+- **Processing**: Extract resources, "upload" to CMS (using stubs initially)
+- **Output**: Modified HTML with CMS URLs ready for distribution
+- **Approach**: Stub-first development - build with mock CMS API, swap when real API available
+
+### Full Application Features (When Complete)
 - Runs exclusively as an iframe within ChabadUniverse/Valu Social
-- **Core Function**: Processes pasted HTML to upload resources to CMS
 - Takes newsletter HTML as input (paste or upload)
 - Extracts all external resources (PDFs, images, documents)
 - Downloads resources and uploads them to ChabadUniverse CMS
 - Replaces original URLs with CMS URLs (which handle auth/redirects)
 - Returns modified HTML ready for distribution
-- Uses Next.js 15 App Router (not Pages Router)
+- Tracks processing history in MongoDB
 
 ## Architecture
 
@@ -94,10 +103,19 @@ The CMS URLs returned (e.g., `https://cms.chabaduniverse.com/api/resource/abc123
 - Redirect public users to website view
 - Track resource access for analytics
 
-### API Integration
+### API Integration (Phase 2 MVP)
+For the MVP, we use stub functions that simulate the CMS API:
+- **Stub Upload**: Mock function returns fake CMS URLs
+- **Pattern**: `https://cms.chabaduniverse.com/api/resource/mock-{id}`
+- **Migration Path**: Replace stubs with real API when available
+
+### API Integration (Production)
+When the real CMS API is available:
 - **Resource Upload**: PUT to ChabadUniverse CMS, returns new URL
 - **Authentication**: Via Valu getCurrentUser() for admin verification
 - **Error Handling**: Retry logic for failed uploads
+- **Access Control**: Files can be public, private, or permissioned
+- **Redirect Logic**: CMS URLs redirect based on auth status
 
 ## Key Considerations
 - **Admin-only tool** - No public access
@@ -179,30 +197,51 @@ The workflow automatically captures:
 
 All development context is preserved without extra effort, creating a zero-effort knowledge base.
 
-## Implementation Roadmap
+## Phase 2 MVP Implementation (1-2 Week Sprint)
 
-### Phase 1: Core HTML Processing (Priority: IMMEDIATE)
-- [ ] HTML input component (textarea for paste)
-- [ ] Cheerio-based resource extractor
-- [ ] Resource URL validator
-- [ ] Basic UI layout
+### Week 1: Core Processing
+**Days 1-2: HTML Input & Parser**
+- [ ] Admin page at `/app/admin/page.tsx`
+- [ ] HTML textarea component for paste input
+- [ ] Cheerio parser to extract external URLs
+- [ ] Basic processing types and interfaces
 
-### Phase 2: Resource Processing (Priority: HIGH)
-- [ ] Parallel resource downloader
-- [ ] File type validation
-- [ ] CMS upload integration via Valu API
-- [ ] URL replacement engine
+**Days 3-4: Resource Processing**
+- [ ] Resource extractor (PDFs, images, documents)
+- [ ] URL mapping system (original → CMS)
+- [ ] HTML URL replacement engine
+- [ ] Test with sample newsletter
 
-### Phase 3: User Interface (Priority: MEDIUM)
-- [ ] Processing status display
-- [ ] Before/after preview
-- [ ] Copy-to-clipboard for output
-- [ ] Error handling UI
+**Day 5: CMS Stub Functions**
+- [ ] Create `/lib/cms/cmsStubs.ts` with mock upload
+- [ ] Return fake CMS URLs for testing
+- [ ] Wire stubs to processing pipeline
 
-### Phase 4: Data Persistence (Priority: LOW)
-- [ ] MongoDB models for history
-- [ ] Processing session tracking
-- [ ] Analytics dashboard
+### Week 2: UI & Polish
+**Days 6-7: Basic Interface**
+- [ ] Processing status indicators
+- [ ] Output textarea with processed HTML
+- [ ] Copy-to-clipboard functionality
+- [ ] Basic error display
+
+**Days 8-9: Integration**
+- [ ] End-to-end testing
+- [ ] Handle edge cases
+- [ ] Basic retry logic
+- [ ] Simple admin layout
+
+**Day 10: Deployment**
+- [ ] Documentation updates
+- [ ] Deploy to Vercel
+- [ ] Handoff notes for real API
+
+### Out of Scope for MVP
+- MongoDB processing history
+- Before/after preview
+- Batch processing
+- Full Valu authentication (stub admin access)
+- Production error recovery
+- Analytics dashboard
 
 ## Related Projects
 - **Universe-Portal** (`../universe-portal`): Reference architecture
@@ -216,24 +255,37 @@ All development context is preserved without extra effort, creating a zero-effor
 
 ## Project Status Summary
 
-### ✅ Complete
+### ✅ Complete (Infrastructure)
 - Next.js 15 setup with App Router
 - TypeScript configuration
 - Tailwind CSS with Hebrew/RTL support
 - Directory structure
-- Core type definitions
+- Core type definitions (needs updating)
 - Development workflow
+- Sample newsletter for testing
 
-### 📋 To Implement
-- HTML input interface
-- Resource extraction logic
-- Download/upload pipeline
-- URL replacement engine
-- Admin UI components
-- Processing history tracking
+### 🎯 Phase 2 MVP To Build (1-2 Weeks)
+- [ ] HTML input textarea component
+- [ ] Cheerio-based resource extractor
+- [ ] URL replacement engine
+- [ ] CMS stub functions
+- [ ] Basic admin UI
+- [ ] Copy-to-clipboard output
+- [ ] Deploy to Vercel
 
-### 🚀 Getting Started
-1. Configure `.env.local` with your values
-2. Run `npm run dev` to start development
-3. Begin with Phase 1: HTML input and parsing
-4. Use mock CMS API for development
+### 📦 Future Enhancements (Post-MVP)
+- Real CMS API integration
+- MongoDB processing history
+- Before/after preview
+- Batch processing
+- Full authentication
+- Error recovery UI
+- Analytics dashboard
+
+### 🚀 Getting Started for Phase 2 MVP
+1. Review this document and PHASE2_MVP.md
+2. Run `npm install` to ensure dependencies
+3. Run `npm run dev` to start development
+4. Begin with `/app/admin/page.tsx` - the HTML input interface
+5. Use stub functions for CMS API
+6. Test with `/public/samples/5785/yom_kippur.html`

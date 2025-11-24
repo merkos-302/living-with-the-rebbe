@@ -21,7 +21,7 @@ export interface Newsletter {
 
 export enum NewsletterStatus {
   PENDING = 'pending',
-  SCRAPING = 'scraping',
+  PROCESSING = 'processing',
   MEDIA_DOWNLOADING = 'media_downloading',
   MEDIA_UPLOADING = 'media_uploading',
   READY_TO_POST = 'ready_to_post',
@@ -83,22 +83,32 @@ export interface ValuUser {
   isAdmin: boolean;
 }
 
-// Archive scraping types
-export interface ArchiveEntry {
-  title: string;
-  url: string;
-  year: number;
-  parsha?: string;
+// HTML Processing types (Phase 2 MVP)
+export interface ParsedResource {
+  originalUrl: string;
+  type: 'pdf' | 'image' | 'document' | 'other';
+  filename: string;
 }
 
-export interface ScrapedNewsletter {
-  title: string;
-  url: string;
-  htmlContent: string;
-  mediaUrls: string[];
-  publishDate: Date;
-  parsha?: string;
-  year: number;
+export interface ProcessingResult {
+  originalHtml: string;
+  processedHtml: string;
+  resources: ParsedResource[];
+  urlMappings: Record<string, string>; // original -> CMS URL mapping
+  processingTime: number; // milliseconds
+  errors?: string[];
+}
+
+export interface CMSUploadResponse {
+  success: boolean;
+  cmsUrl: string;
+  resourceId: string;
+  error?: string;
+}
+
+export interface URLMapping {
+  original: string;
+  replacement: string;
 }
 
 // Error types
@@ -114,11 +124,12 @@ export class NewsletterError extends Error {
 }
 
 export enum NewsletterErrorCode {
-  SCRAPING_FAILED = 'SCRAPING_FAILED',
+  HTML_PARSING_FAILED = 'HTML_PARSING_FAILED',
   MEDIA_DOWNLOAD_FAILED = 'MEDIA_DOWNLOAD_FAILED',
   MEDIA_UPLOAD_FAILED = 'MEDIA_UPLOAD_FAILED',
   POST_FAILED = 'POST_FAILED',
   AUTHENTICATION_FAILED = 'AUTHENTICATION_FAILED',
-  INVALID_NEWSLETTER_URL = 'INVALID_NEWSLETTER_URL',
+  INVALID_HTML_CONTENT = 'INVALID_HTML_CONTENT',
   DATABASE_ERROR = 'DATABASE_ERROR',
+  URL_REPLACEMENT_FAILED = 'URL_REPLACEMENT_FAILED',
 }

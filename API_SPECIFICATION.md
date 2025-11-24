@@ -3,9 +3,54 @@
 
 ## Overview
 
-This document specifies the API endpoints required from the ChabadUniverse platform to enable the Living with the Rebbe admin tool functionality. These APIs need to be implemented by the Valu Social/ChabadUniverse team before development can proceed.
+This document specifies the API endpoints required from the ChabadUniverse platform to enable the Living with the Rebbe admin tool functionality.
 
 **Status**: ⚠️ **NOT IMPLEMENTED** - This is a specification for APIs that need to be created.
+
+## 🚀 Phase 2 MVP Approach - Stub Functions
+
+**For the Phase 2 MVP (1-2 week sprint), we are using stub functions instead of waiting for the real API.**
+
+### MVP Stub Implementation
+
+During MVP development, all API calls will be handled by stub functions in `/lib/cms/cmsStubs.ts`:
+
+```typescript
+// Example stub function for media upload
+export async function uploadToCMS(resource: ParsedResource): Promise<CMSUploadResponse> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  // Return mock CMS URL
+  return {
+    success: true,
+    cmsUrl: `https://cms.chabaduniverse.com/api/resource/mock-${uuidv4()}`,
+    resourceId: `mock-${uuidv4()}`
+  };
+}
+```
+
+### Migration Path
+
+When the real ChabadUniverse API becomes available:
+1. Replace stub functions in `/lib/cms/cmsStubs.ts` with real API calls
+2. Update authentication to use real Valu API tokens
+3. Add proper error handling and retry logic
+4. Enable MongoDB for processing history
+
+### MVP Stub Endpoints
+
+For MVP, the following endpoints are stubbed:
+- `uploadToCMS()` - Returns mock CMS URLs
+- `checkMediaExists()` - Always returns false
+- `createPost()` - Returns mock post ID
+- `getChannelInfo()` - Returns mock channel data
+
+---
+
+## Full API Specification (Post-MVP)
+
+The following specification describes the complete API that will be implemented by the ChabadUniverse team:
 
 ## Table of Contents
 1. [Authentication](#authentication)
