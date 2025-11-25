@@ -241,3 +241,87 @@ Deleted (Moved to Archive):
 
 ### Final Notes
 The project is now perfectly positioned for rapid MVP development. Documentation clearly defines what to build, how to build it, and when to build it. The stub-first approach means development can start immediately without waiting for external dependencies.
+
+---
+
+## Post-Session Update - 18:15
+
+### Critical Addition: Valu API Authentication Requirements
+
+After session end, added mandatory Valu API authentication to PHASE2_MVP.md based on universe-portal implementation analysis.
+
+#### Context
+User identified that the application **MUST** run exclusively inside an iframe within ChabadUniverse/Valu Social. Direct access must be blocked, and only authenticated admin users should have access.
+
+#### Analysis Performed
+- Analyzed universe-portal's Valu API implementation via specialized agent
+- Created comprehensive reference document at `/docs/VALU_AUTHENTICATION_REFERENCE.md`
+- Identified key authentication patterns and security requirements
+
+#### Changes to PHASE2_MVP.md
+
+**1. Scope Update**:
+- Moved from "Out of Scope" to "In Scope": Valu API authentication with iframe-only access and admin verification
+- This is now a **required** MVP feature, not optional
+
+**2. Added Section 0: Valu API Authentication (REQUIRED FIRST)**:
+- Complete authentication implementation before any other features
+- Includes 5 key components:
+  - `/lib/valu-api-singleton.ts` - API instance manager
+  - `/components/valu/ValuFrameGuard.tsx` - Iframe enforcement
+  - `/hooks/useValuAuth.ts` - Authentication hook with admin verification
+  - `/app/layout.tsx` - Provider setup
+  - Security requirements and testing approach
+
+**3. Updated Timeline**:
+- **Day 1**: Now dedicated to Valu API authentication setup (new)
+- **Days 2-3**: HTML input & parser (was Days 1-2)
+- **Day 4**: Resource processing (was Days 3-4)
+- **Day 5**: CMS stubs (unchanged)
+
+**4. Added Security Requirements**:
+- Origin validation (chabaduniverse.com or valu.social only)
+- Admin-only access with role/permission checks
+- No direct access allowed (iframe-only)
+- HTTPS-only communication
+
+**5. Added Development Testing Approach**:
+- Test harness HTML for local iframe simulation
+- Environment variable for development mode bypass
+- Conditional guards for development vs production
+
+**6. Updated Testing Checklist**:
+- Added authentication testing section
+- Direct access blocking verification
+- Admin user verification tests
+- Loading state tests
+
+#### Key Code Examples Added
+
+Provided complete, copy-ready code for:
+- ValuApiSingleton class (prevents memory leaks)
+- ValuFrameGuard component (blocks non-iframe access)
+- useValuAuth hook (fetches and verifies admin users)
+- Provider hierarchy setup in root layout
+- Development test harness for local testing
+
+#### Impact on MVP
+
+This change ensures the application is secure from Day 1:
+- No unauthorized access possible
+- Admin-only operations protected
+- Proper integration with ChabadUniverse ecosystem
+- Maintains audit trail through user context
+
+#### Files Modified in This Update
+- `PHASE2_MVP.md` - Added comprehensive authentication section
+- `.claude/sessions/2025-11-24-1731-documentation-and-organization-update.md` - Added this post-session summary
+
+#### Next Steps
+When starting Phase 2 MVP implementation:
+1. Begin with Day 1: Valu API authentication setup
+2. Use `/docs/VALU_AUTHENTICATION_REFERENCE.md` as implementation guide
+3. Copy patterns from universe-portal as documented
+4. Test with provided test harness before ChabadUniverse integration
+
+This critical security requirement is now properly documented and integrated into the MVP plan.

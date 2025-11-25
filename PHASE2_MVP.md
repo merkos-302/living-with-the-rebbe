@@ -10,6 +10,7 @@
 ## Phase 2 MVP Scope
 
 ### In Scope ✅
+- **Valu API authentication** (iframe-only access, admin verification)
 - HTML input via textarea (paste)
 - Parse HTML to extract external resources
 - Replace resource URLs with CMS URLs (using stubs)
@@ -21,12 +22,192 @@
 - MongoDB processing history
 - Before/after visual preview
 - Batch processing
-- Full Valu authentication (stub admin access)
 - Real CMS API integration (use stubs)
 - File upload interface
 - Analytics dashboard
 
 ## Technical Implementation
+
+### 0. Valu API Authentication (REQUIRED FIRST)
+
+This application **MUST** run exclusively inside an iframe within ChabadUniverse/Valu Social. Direct access must be blocked.
+
+#### Authentication Components Required
+
+##### `/lib/valu-api-singleton.ts` - API Instance Manager
+```typescript
+// Singleton pattern for Valu API instance
+// Prevents multiple API connections and memory leaks
+import { valuApi } from '@arkeytyp/valu-api';
+
+class ValuApiSingleton {
+  private static instance: any;
+
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = valuApi.createInstance();
+    }
+    return this.instance;
+  }
+}
+```
+
+##### `/components/valu/ValuFrameGuard.tsx` - Iframe Enforcement
+```typescript
+export function ValuFrameGuard({ children }: { children: React.ReactNode }) {
+  const [isInFrame, setIsInFrame] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check if running in iframe
+    const inFrame = window !== window.parent;
+    setIsInFrame(inFrame);
+
+    // Also verify parent origin
+    if (inFrame) {
+      window.parent.postMessage({ type: 'valu-verify' }, '*');
+    }
+  }, []);
+
+  if (isInFrame === null) return null; // Prevent flash
+
+  if (!isInFrame) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <p>This application must be accessed through ChabadUniverse.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+```
+
+##### `/hooks/useValuAuth.ts` - Authentication Hook
+```typescript
+export function useValuAuth() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const valuApi = ValuApiSingleton.getInstance();
+        const currentUser = await valuApi.getCurrentUser();
+
+        // Verify admin access
+        const hasAdminAccess =
+          currentUser?.roles?.includes('channel_admin') ||
+          currentUser?.roles?.includes('admin') ||
+          currentUser?.permissions?.includes('admin');
+
+        if (!hasAdminAccess) {
+          throw new Error('Admin access required');
+        }
+
+        setUser(currentUser);
+        setIsAdmin(true);
+      } catch (error) {
+        console.error('Auth failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, []);
+
+  return { user, loading, isAdmin };
+}
+```
+
+##### `/app/layout.tsx` - Provider Setup
+```typescript
+import { ValuApiProvider } from '@arkeytyp/valu-api';
+import { ValuFrameGuard } from '@/components/valu/ValuFrameGuard';
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <ValuApiProvider>
+          <ValuFrameGuard>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ValuFrameGuard>
+        </ValuApiProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+#### Implementation Steps
+1. **Install Valu API**: `npm install @arkeytyp/valu-api@^1.1.0`
+2. **Copy authentication patterns** from universe-portal (see `/docs/VALU_AUTHENTICATION_REFERENCE.md`)
+3. **Set up iframe detection** in root layout
+4. **Implement admin verification** in auth hook
+5. **Protect admin routes** with authentication guard
+
+#### Security Requirements
+- **Origin Validation**: Only accept messages from `chabaduniverse.com` or `valu.social`
+- **Admin-Only Access**: Verify user has admin role or permission
+- **No Direct Access**: Block any attempt to load outside of iframe
+- **HTTPS Only**: All communication must be over secure connections
+
+#### Development Testing
+For local development without ChabadUniverse parent frame:
+
+1. **Create Test Harness** (`/test-harness.html`):
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Valu Test Harness</title></head>
+<body>
+  <iframe
+    src="http://localhost:3000"
+    width="100%"
+    height="800px"
+    id="app-frame">
+  </iframe>
+  <script>
+    // Simulate Valu parent frame messages
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'valu-verify') {
+        event.source.postMessage({
+          type: 'valu-auth',
+          user: {
+            id: 'test-admin',
+            email: 'admin@test.com',
+            roles: ['admin'],
+            permissions: ['admin']
+          }
+        }, '*');
+      }
+    });
+  </script>
+</body>
+</html>
+```
+
+2. **Environment Variable for Dev Mode**:
+```env
+NEXT_PUBLIC_VALU_DEV_MODE=true  # Bypasses iframe check in development
+```
+
+3. **Conditional Guard in Development**:
+```typescript
+const isDev = process.env.NODE_ENV === 'development';
+const devMode = process.env.NEXT_PUBLIC_VALU_DEV_MODE === 'true';
+
+if (!isInFrame && !devMode) {
+  return <AccessDenied />;
+}
+```
 
 ### 1. Core Components to Build
 
@@ -106,23 +287,41 @@ interface URLMapping {
 
 ## Week 1: Core Processing (Days 1-5)
 
-### Days 1-2: HTML Input & Parser
+### Day 1: Valu API Authentication Setup
+**Goal**: Implement iframe-only access with admin verification
+
+**Tasks**:
+1. Install `@arkeytyp/valu-api@^1.1.0` package
+2. Create `/lib/valu-api-singleton.ts` for API instance management
+3. Implement `/components/valu/ValuFrameGuard.tsx` for iframe enforcement
+4. Create `/hooks/useValuAuth.ts` with admin verification
+5. Update `/app/layout.tsx` with ValuApiProvider and guards
+6. Test authentication flow with mock parent frame
+
+**Success Criteria**:
+- App blocks direct access (non-iframe)
+- Successfully authenticates admin users
+- Proper error messages for non-admin users
+- Loading states during authentication
+
+### Days 2-3: HTML Input & Parser
 **Goal**: Create working HTML input and resource extraction
 
 **Tasks**:
-1. Create `/app/admin/page.tsx` with basic layout
-2. Add HTML textarea component
+1. Create `/app/admin/page.tsx` with authenticated layout
+2. Add HTML textarea component (protected by auth)
 3. Implement Cheerio parser in `/lib/parser/htmlParser.ts`
 4. Extract all external URLs from HTML
 5. Categorize resources by type (PDF, image, document)
 6. Test with sample newsletter
 
 **Success Criteria**:
+- Only authenticated admins can access
 - Can paste HTML into textarea
 - Parser extracts all external resource URLs
 - Resources properly categorized by type
 
-### Days 3-4: Resource Processing & URL Replacement
+### Day 4: Resource Processing & URL Replacement
 **Goal**: Build URL mapping and replacement system
 
 **Tasks**:
@@ -321,6 +520,15 @@ export function replaceURLsInHTML(
 - Performance with large newsletters
 
 ### Manual Testing Checklist
+
+#### Authentication Testing
+- [ ] Direct access blocked (open URL directly - should show "Access Denied")
+- [ ] Iframe access allowed (load within ChabadUniverse frame)
+- [ ] Non-admin users rejected with proper message
+- [ ] Admin users can access the tool
+- [ ] Loading states display during auth
+
+#### Processing Testing
 - [ ] Paste Yom Kippur sample HTML
 - [ ] Verify all PDFs identified
 - [ ] Verify all images identified
@@ -332,11 +540,11 @@ export function replaceURLsInHTML(
 
 ### When Real CMS API Available:
 1. Replace `/lib/cms/cmsStubs.ts` with real implementation
-2. Add proper authentication via Valu API
-3. Implement actual file download before upload
-4. Add proper error handling and retry logic
-5. Enable MongoDB for processing history
-6. Add before/after preview feature
+2. Implement actual file download before upload
+3. Add proper error handling and retry logic
+4. Enable MongoDB for processing history
+5. Add before/after preview feature
+6. Enhanced permission checks for file access levels
 
 ### Environment Variables for Production:
 ```env
