@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Heebo } from 'next/font/google';
 import './globals.css';
+import { Providers } from './providers';
 
 // English font
 const inter = Inter({
@@ -30,14 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${inter.variable} ${heebo.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
-        {/* Provider hierarchy will be added here:
-            <ValuApiProvider>
-              <AuthProvider>
-                {children}
-              </AuthProvider>
-            </ValuApiProvider>
-        */}
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

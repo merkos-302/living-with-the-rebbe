@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Valu API Test Harness - Living with the Rebbe</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+          Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .controls {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .control-group {
+        margin-bottom: 15px;
+      }
+
+      .control-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+      }
+
+      .control-group input,
+      .control-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #5568d3;
+      }
+
+      .btn-secondary {
+        background: #48bb78;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #38a169;
+      }
+
+      .btn-danger {
+        background: #f56565;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #e53e3e;
+      }
+
+      .iframe-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      iframe {
+        width: 100%;
+        height: 800px;
+        border: 2px solid #e2e8f0;
+        border-radius: 5px;
+      }
+
+      .status {
+        background: #edf2f7;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 15px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .status-item {
+        padding: 5px 0;
+        border-bottom: 1px solid #cbd5e0;
+      }
+
+      .status-item:last-child {
+        border-bottom: none;
+      }
+
+      .timestamp {
+        color: #718096;
+        margin-right: 10px;
+      }
+
+      .info {
+        background: #bee3f8;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+      }
+
+      .info h3 {
+        color: #2c5282;
+        margin-bottom: 10px;
+      }
+
+      .info ul {
+        margin-left: 20px;
+        color: #2d3748;
+      }
+
+      .info li {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🧪 Valu API Test Harness</h1>
+        <p>
+          Simulate ChabadUniverse parent frame for local development of Living with the Rebbe admin
+          tool
+        </p>
+      </div>
+
+      <div class="controls">
+        <div class="info">
+          <h3>How to Use</h3>
+          <ul>
+            <li>
+              Make sure your Next.js app is running on
+              <strong>http://localhost:3000</strong>
+            </li>
+            <li>Configure the mock user details below (default: admin user)</li>
+            <li>The iframe will simulate messages from ChabadUniverse/Valu Social</li>
+            <li>Check the status log for message exchanges</li>
+            <li>Use "Reload Iframe" to refresh after code changes</li>
+          </ul>
+        </div>
+
+        <div class="control-group">
+          <label for="user-name">User Name</label>
+          <input type="text" id="user-name" value="Test Admin" />
+        </div>
+
+        <div class="control-group">
+          <label for="user-email">User Email</label>
+          <input type="text" id="user-email" value="admin@test.com" />
+        </div>
+
+        <div class="control-group">
+          <label for="user-role">User Role</label>
+          <select id="user-role">
+            <option value="channel_admin">Channel Admin (Has Access)</option>
+            <option value="admin">Admin (Has Access)</option>
+            <option value="user">Regular User (No Access)</option>
+          </select>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="reloadIframe()">Reload Iframe</button>
+          <button class="btn-secondary" onclick="sendAuthMessage()">Send Auth Message</button>
+          <button class="btn-danger" onclick="clearStatus()">Clear Status Log</button>
+        </div>
+
+        <div id="status" class="status">
+          <div class="status-item">
+            <span class="timestamp">[Loading]</span> Test harness initialized
+          </div>
+        </div>
+      </div>
+
+      <div class="iframe-container">
+        <iframe id="app-frame" src="http://localhost:3000"></iframe>
+      </div>
+    </div>
+
+    <script>
+      const statusEl = document.getElementById('status');
+      const iframe = document.getElementById('app-frame');
+
+      // Add status message
+      function addStatus(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const statusItem = document.createElement('div');
+        statusItem.className = 'status-item';
+        statusItem.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+        statusEl.appendChild(statusItem);
+        statusEl.scrollTop = statusEl.scrollHeight;
+      }
+
+      // Clear status log
+      function clearStatus() {
+        statusEl.innerHTML = '<div class="status-item"><span class="timestamp">[Cleared]</span> Status log cleared</div>';
+      }
+
+      // Reload iframe
+      function reloadIframe() {
+        addStatus('Reloading iframe...');
+        iframe.src = iframe.src;
+      }
+
+      // Get mock user data
+      function getMockUser() {
+        const name = document.getElementById('user-name').value;
+        const email = document.getElementById('user-email').value;
+        const role = document.getElementById('user-role').value;
+
+        return {
+          id: 'mock_user_' + Date.now(),
+          name: name,
+          email: email,
+          roles: [role],
+          permissions: role === 'channel_admin' || role === 'admin' ? ['admin'] : [],
+          profile: {
+            displayName: name,
+            profileImage: 'https://via.placeholder.com/100'
+          }
+        };
+      }
+
+      // Send authentication message to iframe
+      function sendAuthMessage() {
+        const mockUser = getMockUser();
+        addStatus(`Sending auth message for user: ${mockUser.name} (${mockUser.roles[0]})`);
+
+        iframe.contentWindow.postMessage(
+          {
+            type: 'valu-auth',
+            user: mockUser
+          },
+          'http://localhost:3000'
+        );
+      }
+
+      // Listen for messages from iframe
+      window.addEventListener('message', (event) => {
+        // Only accept messages from our iframe
+        if (event.origin !== 'http://localhost:3000') {
+          return;
+        }
+
+        addStatus(`Received message: ${JSON.stringify(event.data)}`);
+
+        // Respond to verification requests
+        if (event.data.type === 'valu-verify') {
+          addStatus('Iframe requested verification - sending mock auth');
+          setTimeout(() => sendAuthMessage(), 500);
+        }
+
+        // Respond to resize requests
+        if (event.data.type === 'resize') {
+          addStatus(`Resize request: ${event.data.height}px`);
+          iframe.style.height = event.data.height + 'px';
+        }
+
+        // Log processing events
+        if (event.data.type === 'processing-progress') {
+          addStatus(`Processing: ${event.data.payload?.message || 'Working...'}`);
+        }
+
+        if (event.data.type === 'processing-complete') {
+          addStatus(`✅ Processing complete: ${event.data.payload?.newsletterCount || 0} newsletters`);
+        }
+
+        if (event.data.type === 'processing-error') {
+          addStatus(`❌ Error: ${event.data.payload?.error || 'Unknown error'}`);
+        }
+      });
+
+      // Auto-send auth message when iframe loads
+      iframe.addEventListener('load', () => {
+        addStatus('Iframe loaded - waiting for verification request...');
+      });
+
+      addStatus('Test harness ready. Waiting for iframe to load...');
+    </script>
+  </body>
+</html>

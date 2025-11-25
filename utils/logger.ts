@@ -27,6 +27,10 @@ class Logger {
     console.log(this.formatMessage('info', message, context)); // eslint-disable-line no-console
   }
 
+  success(message: string, context?: LogContext): void {
+    console.log(this.formatMessage('info', `✓ ${message}`, context)); // eslint-disable-line no-console
+  }
+
   warn(message: string, context?: LogContext): void {
     console.warn(this.formatMessage('warn', message, context));
   }

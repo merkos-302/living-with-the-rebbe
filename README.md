@@ -41,8 +41,19 @@ The CMS URLs automatically handle viewer authentication - authenticated users se
 - ESLint and Prettier configured
 - Complete directory structure
 - Sample newsletter for testing
+- **Valu API Authentication System** (Day 1 Complete)
 
-**MVP Sprint (🚀 1-2 Weeks)**:
+**Authentication Implementation (✅ Complete)**:
+- Iframe-only access enforcement
+- Valu API integration (@arkeytyp/valu-api v1.1.0)
+- Admin permission verification
+- Cookie-based user caching
+- Health monitoring with adaptive intervals
+- Multiple fallback methods for user fetching
+- Development mode with test harness
+- ChabadUniverse user format compatibility
+
+**MVP Sprint (🚀 In Progress - Week 1)**:
 - HTML textarea input for paste
 - Cheerio parser to extract resources
 - URL replacement engine
@@ -56,20 +67,27 @@ The CMS URLs automatically handle viewer authentication - authenticated users se
 - File upload interface
 - Before/after preview
 - MongoDB processing history
-- Full Valu authentication
 - Batch processing
 - Analytics dashboard
 
 ## Quick Start for MVP Development
 
 ```bash
-# Install dependencies (already done)
+# Install dependencies
 npm install
+
+# Configure environment (optional for local dev)
+cp .env.example .env.local
+# Set NEXT_PUBLIC_VALU_DEV_MODE=true for local development
 
 # Start development server
 npm run dev
 
-# Open http://localhost:3000
+# For iframe testing, open test harness:
+# http://localhost:3000/test-harness.html
+
+# Or access directly (requires dev mode):
+# http://localhost:3000
 ```
 
 ### MVP Implementation Path
@@ -151,11 +169,17 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 
 ## Project Status
 
-**Current Phase**: Phase 2 MVP Development (Starting)
+**Current Phase**: Phase 2 MVP Development - Week 1 (Day 1 Complete)
 
 ### Week 1 Tasks (Core Processing)
-- [ ] Day 1-2: HTML input component & Cheerio parser
-- [ ] Day 3-4: Resource extraction & URL replacement
+- [x] **Day 1: Valu API Authentication** ✅ COMPLETE
+  - Iframe-only access enforcement
+  - Admin permission verification
+  - Cookie-based caching
+  - Health monitoring
+  - Development test harness
+- [ ] Day 2-3: HTML input component & Cheerio parser
+- [ ] Day 4: Resource extraction & URL replacement
 - [ ] Day 5: CMS stub functions
 
 ### Week 2 Tasks (UI & Deployment)
@@ -172,6 +196,7 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 - ✅ Git hooks with Husky and lint-staged
 - ✅ Complete directory structure created
 - ✅ Sample newsletter for testing
+- ✅ **Valu API authentication system (12 files, 1,356 lines)**
 
 ## Development Workflow
 

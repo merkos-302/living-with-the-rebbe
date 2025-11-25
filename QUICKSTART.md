@@ -15,6 +15,11 @@ Get the Living with the Rebbe admin tool running in 5 minutes.
 ✅ Complete directory structure
 ✅ Type definitions and utilities
 ✅ Sample newsletter with assets
+✅ **Valu API Authentication System (Phase 2 MVP Day 1)**
+✅ Iframe-only access enforcement
+✅ Admin permission verification
+✅ Cookie-based user caching
+✅ Development test harness
 
 ## What Still Needs Implementation
 
@@ -52,9 +57,13 @@ nano .env.local
 
 Required environment variables:
 ```env
+# For local development without iframe
+NEXT_PUBLIC_VALU_DEV_MODE=true
+
+# For production (optional for now)
 NEXT_PUBLIC_CHABAD_UNIVERSE_URL=https://chabaduniverse.com
-CHABAD_UNIVERSE_API_KEY=your-api-key  # For CMS uploads
-MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
+CHABAD_UNIVERSE_API_KEY=your-api-key  # For CMS uploads (future)
+MONGODB_URI=mongodb://localhost:27017/living-with-rebbe  # For history (future)
 ```
 
 ### 3. Start Development Server (1 minute)
@@ -64,12 +73,25 @@ npm run dev
 ```
 
 ### 4. Verify Installation (1 minute)
-Open your browser to http://localhost:3000
 
+**Option A: Direct Access (Dev Mode)**
+```
+http://localhost:3000
+```
 You should see:
 - "Living with the Rebbe - Admin Tool" heading
-- Button to view sample newsletter
-- Clean, styled interface with Hebrew font support
+- Authentication check running
+- Loading spinner or admin dashboard
+
+**Option B: Test Harness (Recommended)**
+```
+http://localhost:3000/test-harness.html
+```
+You should see:
+- Iframe simulator interface
+- Mock user configuration panel
+- Your app loaded in iframe context
+- Message exchange logging
 
 ### 5. Run Tests (Optional, 1 minute)
 ```bash
@@ -95,15 +117,22 @@ npm run lint
 - ✅ ESLint code checking
 - ✅ Prettier code formatting
 - ✅ Git hooks for code quality
+- ✅ **Valu API authentication (12 files, 3,036 lines)**
+- ✅ **Iframe-only access enforcement**
+- ✅ **Admin permission verification**
+- ✅ **Cookie-based user caching**
+- ✅ **Health monitoring with adaptive intervals**
+- ✅ **Development test harness for local testing**
 
-### What's Coming Next (HTML Processing)
+### What's Coming Next (HTML Processing - Days 2-10)
 - 📋 HTML input component for pasting newsletters
 - 📋 Resource extraction using Cheerio
 - 📋 Parallel resource downloading
-- 📋 CMS upload via Valu API
+- 📋 CMS upload via stubs (mock implementation)
 - 📋 URL replacement in HTML
 - 📋 Processing status display
-- 📋 Before/after preview
+- 📋 Copy-to-clipboard output
+- 📋 Deploy to Vercel
 
 ## Common Issues
 
@@ -122,30 +151,42 @@ npm install
 
 ## Project Structure
 
-Current structure (Foundation complete):
+Current structure (Foundation + Authentication complete):
 ```
 living-with-the-rebbe/
 ├── app/                    # Next.js 15 App Router ✅
-│   ├── layout.tsx         # Root layout with fonts ✅
-│   ├── page.tsx           # Home page with sample ✅
+│   ├── layout.tsx         # Root layout with providers ✅
+│   ├── page.tsx           # Authenticated home page ✅
+│   ├── providers.tsx      # Client-side providers ✅
 │   ├── globals.css        # Global styles ✅
 │   ├── admin/             # Admin pages (to be created)
-│   └── api/               # API routes (to be created)
+│   └── api/               # API routes (future)
 ├── components/            # React components ✅
+│   ├── valu/             # Valu authentication ✅
+│   │   ├── ValuFrameGuard.tsx    # Iframe enforcement ✅
+│   │   └── AccessDenied.tsx      # Access denied UI ✅
+│   ├── LoadingSpinner.tsx # Loading states ✅
 │   ├── admin/            # Processing UI (to be created)
 │   └── ui/               # Reusable UI (to be created)
+├── contexts/              # React contexts ✅
+│   ├── ValuApiContext.tsx # Valu API context ✅
+│   └── AuthContext.tsx    # Auth context ✅
 ├── lib/                  # Core libraries ✅
+│   ├── valu-api-singleton.ts # API instance manager ✅
 │   ├── parser/          # HTML parsing (to be created)
 │   ├── cms/             # CMS integration (to be created)
 │   └── processor/       # Resource processing (to be created)
-├── models/               # MongoDB schemas ✅
 ├── hooks/                # React hooks ✅
+│   ├── useValuApi.ts    # API connection hook ✅
+│   └── useValuAuth.ts   # Authentication hook ✅
 ├── types/                # TypeScript types ✅
 ├── utils/                # Utilities ✅
 │   ├── env.ts           # Environment vars ✅
-│   └── logger.ts        # Logging ✅
+│   ├── logger.ts        # Logging ✅
+│   └── valuAuthCookie.ts # User caching ✅
 ├── scripts/              # CLI scripts ✅
 ├── public/               # Static assets ✅
+│   ├── test-harness.html # Dev iframe simulator ✅
 │   └── samples/         # Sample newsletter ✅
 └── __tests__/            # Test files ✅
 ```

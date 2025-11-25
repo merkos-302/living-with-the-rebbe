@@ -1,21 +1,77 @@
+'use client';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { AccessDenied } from '@/components/valu/AccessDenied';
+
 export default function HomePage() {
+  const { isLoading, isAuthenticated, isAdmin, user, error, refreshUser } = useAuth();
+
+  // Show loading state during authentication
+  if (isLoading) {
+    return <LoadingSpinner message="Authenticating with ChabadUniverse..." />;
+  }
+
+  // Show error if authentication failed
+  if (error) {
+    return (
+      <AccessDenied
+        title="Authentication Failed"
+        message={error}
+        showRetry={true}
+        onRetry={refreshUser}
+      />
+    );
+  }
+
+  // Show access denied if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <AccessDenied
+        title="Authentication Required"
+        message="You must be authenticated to access this tool."
+        showRetry={true}
+        onRetry={refreshUser}
+      />
+    );
+  }
+
+  // Show access denied if not admin
+  if (!isAdmin) {
+    return (
+      <AccessDenied
+        title="Admin Access Required"
+        message="Only channel administrators can access this tool."
+      />
+    );
+  }
+
+  // User is authenticated and is an admin - show the dashboard
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
       <div className="max-w-2xl text-center">
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-800">
+            <strong>Authenticated as Admin</strong>
+            <br />
+            Welcome, {user?.displayName || user?.name}!
+          </p>
+        </div>
+
         <h1 className="text-4xl font-bold mb-4">Living with the Rebbe</h1>
         <h2 className="text-2xl text-gray-600 mb-8">Admin Tool</h2>
         <p className="text-lg text-gray-700 mb-4">
-          This is an admin-only tool for scraping and publishing newsletters to ChabadUniverse.
+          This is an admin-only tool for processing newsletters for ChabadUniverse.
         </p>
         <p className="text-sm text-gray-500">
           This application runs exclusively as an iframe within ChabadUniverse/Valu Social.
         </p>
         <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-800 font-semibold">
-            Status: Planning/Documentation Phase
+            Status: Day 1 - Authentication Complete
           </p>
           <p className="text-sm text-yellow-700 mt-2">
-            No implementation yet. Ready for development.
+            Valu API authentication is working! Next: HTML processing interface.
           </p>
         </div>
 
