@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Current Status**: Phase 2 MVP Development - 1-2 Week Sprint
+**Current Status**: Phase 2 MVP Development - Week 1 (Day 1 Complete)
 
 This is an admin tool for ChabadUniverse channel administrators to process "Living with the Rebbe" newsletters before distribution.
 
@@ -40,9 +40,11 @@ The MVP focuses on delivering a functional HTML processing tool within 1-2 weeks
 - **Lucide React** for icons
 
 ### Valu/ChabadUniverse Integration
-- **@arkeytyp/valu-api** for iframe communication and authentication
-- **CMS API** for resource upload (PUT endpoints)
-- **Admin-only access** via Valu authentication
+- **@arkeytyp/valu-api v1.1.0** for iframe communication and authentication ✅
+- **CMS API** for resource upload (PUT endpoints) (to be implemented)
+- **Admin-only access** via Valu authentication ✅
+- **Cookie-based caching** for fast user loading ✅
+- **Health monitoring** with adaptive intervals ✅
 
 ### Content Processing Pipeline
 1. **HTML Input**: Admin pastes or uploads newsletter HTML
@@ -144,25 +146,37 @@ Follow the same provider pattern as universe-portal in root layout:
 
 ### File Organization (Next.js 15 App Router)
 - `/app` - App Router structure ✅ Created
-  - `/app/layout.tsx` - Root layout with fonts ✅
-  - `/app/page.tsx` - Home page ✅
+  - `/app/layout.tsx` - Root layout with providers ✅
+  - `/app/page.tsx` - Authenticated home page ✅
+  - `/app/providers.tsx` - Client-side provider hierarchy ✅
   - `/app/globals.css` - Global styles with Hebrew/RTL ✅
   - `/app/admin` - Admin processing pages (to be created)
-  - `/app/api` - API route handlers (to be created)
 - `/components` - React components ✅ Directory created
+  - `/components/valu` - Valu authentication components ✅
+    - `ValuFrameGuard.tsx` - Iframe enforcement ✅
+    - `AccessDenied.tsx` - Access denied UI ✅
+  - `/components/LoadingSpinner.tsx` - Loading states ✅
   - `/components/admin` - Processing UI components (to be created)
   - `/components/ui` - Reusable UI components (to be created)
 - `/lib` - Core libraries ✅ Directory created
+  - `/lib/valu-api-singleton.ts` - Valu API instance manager ✅
   - `/lib/parser` - HTML parsing logic (to be created)
   - `/lib/cms` - CMS upload integration (to be created)
   - `/lib/processor` - Resource processing (to be created)
   - `/lib/db` - Database connection (to be created)
-- `/models` - Mongoose schemas ✅ Directory created (schemas to be implemented)
+- `/contexts` - React contexts ✅ Directory created
+  - `ValuApiContext.tsx` - Valu API context ✅
+  - `AuthContext.tsx` - Authentication context ✅
 - `/hooks` - Custom React hooks ✅ Directory created
+  - `useValuApi.ts` - Low-level API connection hook ✅
+  - `useValuAuth.ts` - High-level authentication hook ✅
 - `/types` - TypeScript types ✅ Core types defined
-- `/utils` - Utility functions ✅ env.ts and logger.ts created
+- `/utils` - Utility functions ✅
+  - `env.ts` and `logger.ts` ✅
+  - `valuAuthCookie.ts` - Cookie-based caching ✅
 - `/scripts` - Node.js CLI scripts ✅ Directory created
 - `/public` - Static assets ✅ Directory created
+  - `test-harness.html` - Development iframe simulator ✅
 
 ## Development Workflow
 
@@ -200,13 +214,31 @@ All development context is preserved without extra effort, creating a zero-effor
 ## Phase 2 MVP Implementation (1-2 Week Sprint)
 
 ### Week 1: Core Processing
-**Days 1-2: HTML Input & Parser**
+
+**Day 1: Valu API Authentication** ✅ COMPLETE
+- [x] Install and configure `@arkeytyp/valu-api@^1.1.0`
+- [x] Implement `/lib/valu-api-singleton.ts` (186 lines)
+- [x] Create `/utils/valuAuthCookie.ts` for caching (104 lines)
+- [x] Build `/hooks/useValuApi.ts` connection hook (169 lines)
+- [x] Build `/hooks/useValuAuth.ts` authentication hook (243 lines)
+- [x] Create `/contexts/ValuApiContext.tsx` (49 lines)
+- [x] Create `/contexts/AuthContext.tsx` (32 lines)
+- [x] Implement `/components/valu/ValuFrameGuard.tsx` (100 lines)
+- [x] Create `/components/valu/AccessDenied.tsx` (65 lines)
+- [x] Create `/components/LoadingSpinner.tsx` (28 lines)
+- [x] Update `/app/layout.tsx` with providers
+- [x] Update `/app/page.tsx` with authentication
+- [x] Create `/public/test-harness.html` for development (252 lines)
+- [x] Configure environment variables for dev mode
+- [x] Verify builds and production readiness
+
+**Days 2-3: HTML Input & Parser**
 - [ ] Admin page at `/app/admin/page.tsx`
 - [ ] HTML textarea component for paste input
 - [ ] Cheerio parser to extract external URLs
 - [ ] Basic processing types and interfaces
 
-**Days 3-4: Resource Processing**
+**Day 4: Resource Processing**
 - [ ] Resource extractor (PDFs, images, documents)
 - [ ] URL mapping system (original → CMS)
 - [ ] HTML URL replacement engine
@@ -255,16 +287,25 @@ All development context is preserved without extra effort, creating a zero-effor
 
 ## Project Status Summary
 
-### ✅ Complete (Infrastructure)
+### ✅ Complete (Infrastructure & Authentication)
 - Next.js 15 setup with App Router
 - TypeScript configuration
 - Tailwind CSS with Hebrew/RTL support
 - Directory structure
-- Core type definitions (needs updating)
+- Core type definitions
 - Development workflow
 - Sample newsletter for testing
+- **Valu API Authentication System (Day 1)**
+  - Iframe-only access enforcement
+  - Admin permission verification
+  - Cookie-based user caching
+  - Health monitoring
+  - Multiple fallback methods
+  - Development test harness
+  - ChabadUniverse user format compatibility
+  - postRunResult bug fix applied
 
-### 🎯 Phase 2 MVP To Build (1-2 Weeks)
+### 🎯 Phase 2 MVP To Build (Remaining Days 2-10)
 - [ ] HTML input textarea component
 - [ ] Cheerio-based resource extractor
 - [ ] URL replacement engine

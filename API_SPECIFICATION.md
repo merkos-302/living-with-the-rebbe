@@ -64,8 +64,49 @@ The following specification describes the complete API that will be implemented 
 
 ### Overview
 The system uses two authentication methods that work together:
-1. **Valu OAuth**: User authentication via iframe (existing)
-2. **API Key**: Static key for server-to-server API calls (new)
+1. **Valu OAuth**: User authentication via iframe ✅ IMPLEMENTED (Phase 2 MVP Day 1)
+2. **API Key**: Static key for server-to-server API calls (to be implemented)
+
+### Valu API Authentication (✅ Implemented)
+
+**Status**: Complete as of Phase 2 MVP Day 1
+
+The Living with the Rebbe application now includes a complete Valu API authentication system:
+
+**Implementation Details**:
+- **Package**: `@arkeytyp/valu-api@^1.1.0`
+- **Architecture**: Singleton pattern with health monitoring
+- **Caching**: Cookie-based user caching (24-hour duration)
+- **Fallbacks**: Multiple methods for fetching user data
+- **Security**: Iframe-only enforcement with dev mode bypass
+- **Compatibility**: Supports ChabadUniverse user data format (permissions as object, userRoles array)
+- **Bug Fixes**: postRunResult timing issues resolved
+
+**Key Files**:
+- `/lib/valu-api-singleton.ts` - API instance manager (186 lines)
+- `/hooks/useValuAuth.ts` - Authentication hook (243 lines)
+- `/hooks/useValuApi.ts` - Connection hook (169 lines)
+- `/utils/valuAuthCookie.ts` - User caching (104 lines)
+- `/components/valu/ValuFrameGuard.tsx` - Iframe enforcement (100 lines)
+
+**Authentication Flow**:
+1. Iframe detection via ValuFrameGuard
+2. Valu API connection establishment
+3. User data fetch with multiple fallback methods
+4. Admin permission verification
+5. Cookie caching for fast subsequent loads
+
+**Admin Verification**:
+```typescript
+const isAdmin =
+  user.roles?.includes('channel_admin') ||
+  user.roles?.includes('admin') ||
+  user.permissions?.includes('admin');
+```
+
+**Development Testing**:
+- Test harness available at `/public/test-harness.html`
+- Dev mode bypass: `NEXT_PUBLIC_VALU_DEV_MODE=true`
 
 ### API Key Authentication
 
