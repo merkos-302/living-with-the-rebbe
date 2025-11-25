@@ -3,11 +3,11 @@
 
 Administrative tool for ChabadUniverse that processes newsletter HTML to centralize resources on the CMS platform.
 
-## Overview
+## 🎯 Phase 2 MVP - 1-2 Week Sprint
 
-**Purpose**: Process newsletter HTML before distribution by uploading all linked resources to ChabadUniverse CMS
-**Environment**: Runs as iframe within ChabadUniverse only
-**Status**: Foundation Complete - Ready for implementation
+**Current Focus**: Build minimal viable HTML processor with stub CMS integration
+**Timeline**: 1-2 weeks to functional MVP
+**Approach**: Stub-first development - mock CMS API, replace when available
 
 ## What This Tool Does
 
@@ -31,26 +31,55 @@ The CMS URLs automatically handle viewer authentication - authenticated users se
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System design (needs update) |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Production deployment guide |
 
-## Core Features
+## Phase 2 MVP Features
 
-**Foundation (Complete)**:
-- ✅ Next.js 15 with App Router configured
-- ✅ TypeScript with strict mode
-- ✅ Tailwind CSS with Hebrew/RTL support
-- ✅ Cheerio for HTML parsing
-- ✅ ESLint and Prettier configured
-- ✅ Complete directory structure
+**Foundation (✅ Complete)**:
+- Next.js 15 with App Router configured
+- TypeScript with strict mode
+- Tailwind CSS with Hebrew/RTL support
+- Cheerio installed for HTML parsing
+- ESLint and Prettier configured
+- Complete directory structure
+- Sample newsletter for testing
 
-**To Implement**:
-- 📋 HTML input interface (paste/upload)
-- 📋 Resource extraction from HTML
-- 📋 Parallel resource downloading
-- 📋 CMS upload via Valu API
-- 📋 URL replacement in HTML
-- 📋 Preview before/after comparison
-- 📋 Processing history tracking
+**MVP Sprint (🚀 1-2 Weeks)**:
+- HTML textarea input for paste
+- Cheerio parser to extract resources
+- URL replacement engine
+- CMS stub functions (mock uploads)
+- Basic processing status display
+- Copy-to-clipboard for output
+- Deploy to Vercel
 
-## Installation
+**Future Enhancements (📦 Post-MVP)**:
+- Real CMS API integration
+- File upload interface
+- Before/after preview
+- MongoDB processing history
+- Full Valu authentication
+- Batch processing
+- Analytics dashboard
+
+## Quick Start for MVP Development
+
+```bash
+# Install dependencies (already done)
+npm install
+
+# Start development server
+npm run dev
+
+# Open http://localhost:3000
+```
+
+### MVP Implementation Path
+1. Start with `/app/admin/page.tsx` - Create HTML input interface
+2. Implement `/lib/parser/htmlParser.ts` - Extract resources with Cheerio
+3. Create `/lib/cms/cmsStubs.ts` - Mock CMS upload functions
+4. Build `/lib/parser/urlReplacer.ts` - Replace URLs in HTML
+5. Test with `/public/samples/5785/yom_kippur.html`
+
+## Installation (Full Setup)
 
 ```bash
 # Clone and install
@@ -122,9 +151,19 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 
 ## Project Status
 
-**Epic #2 Complete**: Foundation and project setup finished
+**Current Phase**: Phase 2 MVP Development (Starting)
 
-### Completed
+### Week 1 Tasks (Core Processing)
+- [ ] Day 1-2: HTML input component & Cheerio parser
+- [ ] Day 3-4: Resource extraction & URL replacement
+- [ ] Day 5: CMS stub functions
+
+### Week 2 Tasks (UI & Deployment)
+- [ ] Day 6-7: Basic UI with status & output
+- [ ] Day 8-9: Integration testing & edge cases
+- [ ] Day 10: Deploy to Vercel
+
+### Infrastructure Complete
 - ✅ Next.js 15 with App Router configured
 - ✅ TypeScript with strict mode enabled
 - ✅ Tailwind CSS with Hebrew/RTL support
@@ -132,17 +171,7 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 - ✅ ESLint and Prettier configured
 - ✅ Git hooks with Husky and lint-staged
 - ✅ Complete directory structure created
-- ✅ Type definitions established
-- ✅ Environment utilities created
-- ✅ Comprehensive documentation
-
-### Next Implementation Phases
-- 📋 Phase 1: HTML Parser & Resource Extractor
-- 📋 Phase 2: Resource Download & CMS Upload
-- 📋 Phase 3: Admin UI Components
-- 📋 Phase 4: Processing History
-- 📋 Phase 5: Testing & Quality Assurance
-- 📋 Phase 6: Production Deployment
+- ✅ Sample newsletter for testing
 
 ## Development Workflow
 
