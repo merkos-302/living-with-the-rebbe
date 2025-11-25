@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Current Status**: Phase 2 MVP Development - Week 1 (Day 1 Complete)
+**Current Status**: Phase 2 MVP Development - Days 1-3 Complete (HTML Input & Parser), Phase 3 Next (Resource Processing)
 
 This is an admin tool for ChabadUniverse channel administrators to process "Living with the Rebbe" newsletters before distribution.
 
@@ -47,12 +47,18 @@ The MVP focuses on delivering a functional HTML processing tool within 1-2 weeks
 - **Health monitoring** with adaptive intervals ✅
 
 ### Content Processing Pipeline
-1. **HTML Input**: Admin pastes or uploads newsletter HTML
-2. **Resource Parser**: Extracts all external links using Cheerio
-3. **Resource Downloader**: Fetches files from original locations
-4. **CMS Uploader**: Uploads to ChabadUniverse CMS via Valu API
-5. **URL Replacer**: Swaps original URLs with CMS URLs
-6. **HTML Output**: Returns modified HTML for distribution
+1. **HTML Input**: Admin provides newsletter HTML via URL fetch (default) or paste (fallback) ✅
+   - URL Fetch Mode: Fetches HTML from S3/web URLs, automatically resolves relative URLs ✅
+   - Paste Mode: Manual HTML paste with base URL field for relative URL resolution ✅
+2. **Resource Parser**: Extracts linked documents (PDFs, Word docs) from `<a>` tags using Cheerio ✅
+   - **IMPORTANT**: Only extracts LINKED documents from `<a href>` tags, NOT inline images from `<img>` tags
+   - Inline images are part of the email's visual content and remain unchanged
+   - Only downloadable resources need CMS hosting
+   - Supports 21 file formats (PDFs, Word docs, Excel sheets, etc.)
+3. **Resource Downloader**: Fetches files from original locations (Phase 3 - to be implemented)
+4. **CMS Uploader**: Uploads to ChabadUniverse CMS via Valu API (Phase 3 - to be implemented)
+5. **URL Replacer**: Swaps original URLs with CMS URLs (Phase 3 - to be implemented)
+6. **HTML Output**: Returns modified HTML for distribution (Phase 3 - to be implemented)
 
 ## Common Commands
 
@@ -150,17 +156,36 @@ Follow the same provider pattern as universe-portal in root layout:
   - `/app/page.tsx` - Authenticated home page ✅
   - `/app/providers.tsx` - Client-side provider hierarchy ✅
   - `/app/globals.css` - Global styles with Hebrew/RTL ✅
-  - `/app/admin` - Admin processing pages (to be created)
+  - `/app/admin` - Admin processing pages ✅
+    - `/app/admin/layout.tsx` - Authenticated wrapper ✅
+    - `/app/admin/page.tsx` - Admin dashboard with tabbed interface ✅
+  - `/app/api` - API route handlers ✅
+    - `/app/api/parse/route.ts` - HTML parsing endpoint ✅
+    - `/app/api/fetch-html/route.ts` - Server-side URL fetcher with rate limiting ✅
 - `/components` - React components ✅ Directory created
   - `/components/valu` - Valu authentication components ✅
     - `ValuFrameGuard.tsx` - Iframe enforcement ✅
     - `AccessDenied.tsx` - Access denied UI ✅
   - `/components/LoadingSpinner.tsx` - Loading states ✅
-  - `/components/admin` - Processing UI components (to be created)
+  - `/components/admin` - Processing UI components ✅
+    - `HtmlInput.tsx` - Dual-mode input (URL fetch + paste HTML) with base URL field ✅
+    - `UrlInput.tsx` - URL fetch interface with automatic relative URL resolution ✅
+    - `ParseResults.tsx` - Resource grid with filtering and statistics ✅
+    - `ResourcePreview.tsx` - Individual resource cards ✅
+    - `HtmlPreview.tsx` - Code viewer with syntax highlighting ✅
   - `/components/ui` - Reusable UI components (to be created)
 - `/lib` - Core libraries ✅ Directory created
   - `/lib/valu-api-singleton.ts` - Valu API instance manager ✅
-  - `/lib/parser` - HTML parsing logic (to be created)
+  - `/lib/parser` - HTML parsing logic ✅ COMPLETE
+    - `html-parser.ts` - Cheerio-based parser ✅
+    - `resource-identifier.ts` - Identifies 21 file formats ✅
+    - `index.ts` - Public API ✅
+    - `demo.ts` - Example usage ✅
+    - Full documentation in `/lib/parser/README.md` ✅
+    - 181 comprehensive tests - all passing across 7 test suites ✅
+  - `/lib/fetcher` - URL fetching logic ✅ COMPLETE
+    - `url-fetcher.ts` - Server-side HTML fetcher with relative URL resolution ✅
+    - Comprehensive tests for S3 URLs and various URL formats ✅
   - `/lib/cms` - CMS upload integration (to be created)
   - `/lib/processor` - Resource processing (to be created)
   - `/lib/db` - Database connection (to be created)
@@ -232,22 +257,36 @@ All development context is preserved without extra effort, creating a zero-effor
 - [x] Configure environment variables for dev mode
 - [x] Verify builds and production readiness
 
-**Days 2-3: HTML Input & Parser**
-- [ ] Admin page at `/app/admin/page.tsx`
-- [ ] HTML textarea component for paste input
-- [ ] Cheerio parser to extract external URLs
-- [ ] Basic processing types and interfaces
+**Days 2-3: HTML Input & Parser** ✅ COMPLETE
+- [x] Admin page at `/app/admin/page.tsx` with tabbed interface (Resources, HTML Preview, Statistics)
+- [x] Admin layout with authentication at `/app/admin/layout.tsx`
+- [x] Dual-mode HTML input component at `/components/admin/HtmlInput.tsx`
+  - URL fetch mode (default): Fetches HTML from S3/web URLs
+  - Paste mode (fallback): Manual HTML paste
+- [x] URL input component at `/components/admin/UrlInput.tsx`
+- [x] Server-side URL fetcher at `/lib/fetcher/url-fetcher.ts`
+- [x] Base URL field for resolving relative URLs manually
+- [x] Automatic relative URL resolution in URL fetch mode
+- [x] Cheerio parser to extract linked documents from `<a>` tags
+- [x] Resource identifier supporting 21 file formats
+- [x] Preview components (ParseResults, ResourcePreview, HtmlPreview)
+- [x] API endpoints: `/api/parse` and `/api/fetch-html` with rate limiting
+- [x] 181 comprehensive tests - all passing across 7 test suites
+- [x] Full documentation in `/lib/parser/README.md` and `/lib/fetcher/README.md`
 
-**Day 4: Resource Processing**
-- [ ] Resource extractor (PDFs, images, documents)
+**Important Implementation Decision**:
+The parser ONLY extracts linked documents (PDFs, Word docs, etc.) from `<a href>` tags, NOT inline images from `<img src>` tags. This is intentional - inline images are part of the email's visual content and should remain as-is, while only downloadable resources need CMS hosting.
+
+**Key Feature - Dual-Mode Input**:
+URL fetch is the DEFAULT mode, automatically resolving all relative URLs using the base URL. Paste mode with base URL field is available as fallback for cases where URL fetching isn't possible.
+
+**Phase 3: Resource Processing** (NEXT)
+- [ ] Resource downloader with parallel processing
+- [ ] File type validation
 - [ ] URL mapping system (original → CMS)
 - [ ] HTML URL replacement engine
+- [ ] CMS stub functions for testing
 - [ ] Test with sample newsletter
-
-**Day 5: CMS Stub Functions**
-- [ ] Create `/lib/cms/cmsStubs.ts` with mock upload
-- [ ] Return fake CMS URLs for testing
-- [ ] Wire stubs to processing pipeline
 
 ### Week 2: UI & Polish
 **Days 6-7: Basic Interface**
@@ -287,7 +326,7 @@ All development context is preserved without extra effort, creating a zero-effor
 
 ## Project Status Summary
 
-### ✅ Complete (Infrastructure & Authentication)
+### ✅ Complete (Infrastructure, Authentication, and Parser)
 - Next.js 15 setup with App Router
 - TypeScript configuration
 - Tailwind CSS with Hebrew/RTL support
@@ -295,7 +334,7 @@ All development context is preserved without extra effort, creating a zero-effor
 - Core type definitions
 - Development workflow
 - Sample newsletter for testing
-- **Valu API Authentication System (Day 1)**
+- **Valu API Authentication System (Day 1)** - 12 files, 1,356 lines
   - Iframe-only access enforcement
   - Admin permission verification
   - Cookie-based user caching
@@ -304,14 +343,26 @@ All development context is preserved without extra effort, creating a zero-effor
   - Development test harness
   - ChabadUniverse user format compatibility
   - postRunResult bug fix applied
+- **HTML Input and Parser System (Days 2-3)** - 30+ files, 3,000+ lines
+  - Admin dashboard with tabbed interface (Resources, HTML Preview, Statistics)
+  - Dual-mode HTML input (URL fetch as default, paste as fallback)
+  - Server-side URL fetcher avoiding CORS issues
+  - Automatic relative URL resolution in URL fetch mode
+  - Base URL field for manual relative URL resolution
+  - Cheerio-based parser (linked documents only from <a> tags)
+  - Resource identifier (21 file formats)
+  - Preview components with filtering and statistics
+  - API routes: /api/parse and /api/fetch-html with rate limiting
+  - 181 comprehensive tests - all passing across 7 test suites
+  - Full documentation in /lib/parser/README.md and /lib/fetcher/README.md
 
-### 🎯 Phase 2 MVP To Build (Remaining Days 2-10)
-- [ ] HTML input textarea component
-- [ ] Cheerio-based resource extractor
+### 🎯 Phase 3: Resource Processing (NEXT)
+- [ ] Resource downloader with parallel processing
+- [ ] CMS upload integration (stub functions first)
 - [ ] URL replacement engine
-- [ ] CMS stub functions
-- [ ] Basic admin UI
-- [ ] Copy-to-clipboard output
+- [ ] Enhanced admin UI with processing status
+- [ ] Copy-to-clipboard for output
+- [ ] Integration testing
 - [ ] Deploy to Vercel
 
 ### 📦 Future Enhancements (Post-MVP)

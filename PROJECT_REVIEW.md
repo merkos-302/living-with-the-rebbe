@@ -1,8 +1,8 @@
 ב׳׳ה
 # PROJECT REVIEW - Living with the Rebbe
 
-**Date**: November 24, 2025
-**Status**: Phase 2 MVP Development Starting
+**Date**: November 25, 2025
+**Status**: Phase 2 MVP Complete (Days 1-3) - HTML Input & Parser with 181 Passing Tests
 
 ## Executive Summary
 
@@ -159,11 +159,28 @@ Given the CMS API is not yet available, we're adopting a stub-first approach:
   - 12 files created, 1,356 lines of code
   - Production ready (TypeScript builds successfully)
 
-### In Progress 🚀
-- Phase 2 MVP Week 1 (Days 2-5)
-- Next: HTML input interface and Cheerio parser
-- Next: Resource extraction and URL replacement
-- Next: CMS stub functions
+### Next Steps 🚀
+- Phase 3: Resource Processing
+- Next: Resource downloader with parallel processing
+- Next: CMS upload integration (stub functions first)
+- Next: URL replacement engine
+- Next: Enhanced output viewer with before/after comparison
+
+### Recently Completed (November 24-25, 2025)
+- ✅ **Days 2-3: HTML Input and Parser Implementation** (COMPLETE)
+  - Admin dashboard with tabbed interface: Resources, HTML Preview, Statistics (`/app/admin/page.tsx`)
+  - Dual-mode HTML input component (`/components/admin/HtmlInput.tsx`)
+    - URL fetch mode (DEFAULT): Fetches HTML from S3/web URLs with automatic relative URL resolution
+    - Paste mode (fallback): Manual HTML paste with base URL field
+  - URL input component (`/components/admin/UrlInput.tsx`)
+  - Server-side URL fetcher (`/lib/fetcher/url-fetcher.ts`) avoiding CORS issues
+  - Cheerio-based parser extracting ONLY linked documents from <a> tags (PDFs, Word docs)
+  - Resource identifier supporting 21 file formats
+  - Preview components with filtering and statistics (ParseResults, ResourcePreview, HtmlPreview)
+  - API endpoints: `/api/parse` and `/api/fetch-html` with rate limiting
+  - 181 comprehensive tests - all passing across 7 test suites
+  - Full documentation in `/lib/parser/README.md` and `/lib/fetcher/README.md`
+  - 30+ files created, ~3,000+ lines of code
 
 ### Blocked/Waiting ⏸️
 - Real CMS API endpoints (using stubs instead - not blocking)
@@ -183,11 +200,19 @@ Given the CMS API is not yet available, we're adopting a stub-first approach:
 
 ## Next Steps
 
-### Immediate (This Week)
-1. Create HTML input component
-2. Implement Cheerio parser
-3. Build URL replacement logic
-4. Create CMS stub functions
+### Phase 2 Complete ✅
+1. ✅ Create dual-mode HTML input component (URL fetch + paste)
+2. ✅ Implement server-side URL fetcher
+3. ✅ Implement Cheerio parser (linked documents only from <a> tags)
+4. ✅ Build admin dashboard with tabbed interface
+5. ✅ Create preview components with filtering and statistics
+6. ✅ Add comprehensive test coverage (181 tests)
+
+### Phase 3 Next ⏳
+1. ⏳ Implement resource downloader with parallel processing
+2. ⏳ Create CMS upload integration (stub functions first)
+3. ⏳ Build URL replacement engine
+4. ⏳ Add enhanced output viewer
 
 ### Next Week
 1. Add UI components
@@ -203,6 +228,20 @@ Given the CMS API is not yet available, we're adopting a stub-first approach:
 5. Enable batch processing
 
 ## Decision Log
+
+### November 25, 2025
+- **Decision**: URL fetch is the DEFAULT mode, paste mode is fallback
+- **Rationale**: Most newsletters come from S3 URLs; automatic relative URL resolution is more convenient
+- **Impact**: Better UX, automatic handling of relative URLs, paste mode available when needed
+
+### November 24-25, 2025
+- **Decision**: Parser extracts ONLY linked documents from `<a>` tags, NOT inline images
+- **Rationale**: Inline images are part of email visual content; only downloadable resources need CMS hosting
+- **Impact**: Clearer scope, prevents unnecessary resource uploads, aligns with actual use case
+
+- **Decision**: Server-side URL fetching to avoid CORS issues
+- **Rationale**: Client-side fetching blocked by CORS policies on S3/external URLs
+- **Impact**: Reliable URL fetching, automatic relative URL resolution, rate limiting protection
 
 ### November 24, 2025
 - **Decision**: Pivot to Phase 2 MVP with 1-2 week timeline

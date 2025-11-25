@@ -13,8 +13,12 @@ const customJestConfig = {
   // Test environment
   testEnvironment: 'jest-environment-jsdom',
 
+  // Allow ESM modules
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+
   // Module name mapper for absolute imports
   moduleNameMapper: {
+    '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
     '^@/(.*)$': '<rootDir>/$1',
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/lib/(.*)$': '<rootDir>/lib/$1',
@@ -41,8 +45,11 @@ const customJestConfig = {
   // Test match patterns
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
 
-  // Transform ignore patterns
-  transformIgnorePatterns: ['/node_modules/', '^.+\\.module\\.(css|sass|scss)$'],
+  // Transform ignore patterns - allow cheerio to be transformed
+  transformIgnorePatterns: [
+    '/node_modules/(?!(cheerio|htmlparser2|dom-serializer|domhandler|entities|css-select|css-what|domelementtype|domutils|nth-check|boolbase)/)',
+    '^.+\\.module\\.(css|sass|scss)$',
+  ],
 
   // Module file extensions
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],

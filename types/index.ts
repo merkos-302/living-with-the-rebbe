@@ -133,3 +133,16 @@ export enum NewsletterErrorCode {
   DATABASE_ERROR = 'DATABASE_ERROR',
   URL_REPLACEMENT_FAILED = 'URL_REPLACEMENT_FAILED',
 }
+
+// Re-export API types
+export type {
+  FetchHtmlRequest,
+  FetchHtmlResponse,
+  FetchHtmlData,
+  FetchHtmlMetadata,
+  FetchHtmlSuccessResponse,
+  FetchHtmlErrorResponse,
+  ApiErrorResponse,
+  ApiSuccessResponse,
+  ApiResponse,
+} from './api';

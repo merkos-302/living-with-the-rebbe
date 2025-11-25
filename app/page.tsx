@@ -7,13 +7,17 @@ import { AccessDenied } from '@/components/valu/AccessDenied';
 export default function HomePage() {
   const { isLoading, isAuthenticated, isAdmin, user, error, refreshUser } = useAuth();
 
+  // Development mode bypass
+  const isDev = process.env.NODE_ENV === 'development';
+  const devModeEnabled = process.env.NEXT_PUBLIC_VALU_DEV_MODE === 'true';
+
   // Show loading state during authentication
   if (isLoading) {
     return <LoadingSpinner message="Authenticating with ChabadUniverse..." />;
   }
 
-  // Show error if authentication failed
-  if (error) {
+  // Show error if authentication failed (but allow dev mode bypass)
+  if (error && !(isDev && devModeEnabled)) {
     return (
       <AccessDenied
         title="Authentication Failed"
@@ -24,8 +28,8 @@ export default function HomePage() {
     );
   }
 
-  // Show access denied if not authenticated
-  if (!isAuthenticated) {
+  // Show access denied if not authenticated (but allow dev mode bypass)
+  if (!isAuthenticated && !(isDev && devModeEnabled)) {
     return (
       <AccessDenied
         title="Authentication Required"
@@ -36,8 +40,8 @@ export default function HomePage() {
     );
   }
 
-  // Show access denied if not admin
-  if (!isAdmin) {
+  // Show access denied if not admin (but allow dev mode bypass)
+  if (!isAdmin && !(isDev && devModeEnabled)) {
     return (
       <AccessDenied
         title="Admin Access Required"
@@ -52,9 +56,11 @@ export default function HomePage() {
       <div className="max-w-2xl text-center">
         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-sm text-green-800">
-            <strong>Authenticated as Admin</strong>
+            <strong>{user ? 'Authenticated as Admin' : 'Development Mode'}</strong>
             <br />
-            Welcome, {user?.displayName || user?.name}!
+            {user
+              ? `Welcome, ${user.displayName || user.name}!`
+              : 'Authentication bypassed for local testing'}
           </p>
         </div>
 
@@ -66,12 +72,33 @@ export default function HomePage() {
         <p className="text-sm text-gray-500">
           This application runs exclusively as an iframe within ChabadUniverse/Valu Social.
         </p>
-        <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-sm text-yellow-800 font-semibold">
-            Status: Day 1 - Authentication Complete
+
+        {/* Admin Access Button */}
+        <div className="mt-8">
+          <a
+            href="/admin"
+            className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <svg
+              className="w-6 h-6 mr-3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Go to Admin Dashboard
+          </a>
+        </div>
+
+        <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800 font-semibold">
+            Status: Phase 2 MVP - Admin UI Complete
           </p>
-          <p className="text-sm text-yellow-700 mt-2">
-            Valu API authentication is working! Next: HTML processing interface.
+          <p className="text-sm text-blue-700 mt-2">
+            Admin interface is ready! You can now input newsletter HTML for processing.
           </p>
         </div>
 

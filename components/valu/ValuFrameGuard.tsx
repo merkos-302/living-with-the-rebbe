@@ -21,16 +21,18 @@ export function ValuFrameGuard({ children, enableDevMode = false }: ValuFrameGua
   useEffect(() => {
     // Check if running in iframe
     const inFrame = typeof window !== 'undefined' && window.self !== window.parent;
-    setIsInFrame(inFrame);
 
     // Development mode bypass
     const isDev = process.env.NODE_ENV === 'development';
     const devModeEnabled = process.env.NEXT_PUBLIC_VALU_DEV_MODE === 'true' || enableDevMode;
 
-    if (!inFrame && isDev && devModeEnabled) {
-      logger.warn('Not in iframe but dev mode enabled - allowing access');
+    if (isDev && devModeEnabled) {
+      logger.warn('Dev mode enabled - bypassing iframe check and allowing access');
       setIsInFrame(true);
+      return;
     }
+
+    setIsInFrame(inFrame);
 
     if (inFrame) {
       logger.info('Running in iframe - Valu integration enabled');
