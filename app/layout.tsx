@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Heebo } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
+import { Header } from '@/components/Header';
 
 // English font
 const inter = Inter({
@@ -31,7 +32,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${inter.variable} ${heebo.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <Header />
+          <main>{children}</main>
+        </Providers>
       </body>
     </html>
   );
