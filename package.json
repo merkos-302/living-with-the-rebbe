@@ -19,7 +19,8 @@
     "test:watch": "jest --watch",
     "scrape:recent": "node scripts/scrape-recent.js",
     "scrape:weekly": "node scripts/weekly-check.js",
-    "export:json": "node scripts/export-json.js"
+    "export:json": "node scripts/export-json.js",
+    "demo:parser": "node scripts/demo-parser.js"
   },
   "dependencies": {
     "@arkeytyp/valu-api": "^1.1.0",

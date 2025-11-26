@@ -49,23 +49,39 @@ Living with the Rebbe is a newsletter resource processor that runs as an iframe 
 
 ```
 app/
-├── layout.tsx                 # Root layout with providers
-├── page.tsx                   # Landing page
-└── admin/
-    ├── page.tsx              # Admin dashboard
-    ├── process/
-    │   └── page.tsx          # HTML processing interface
-    └── history/
-        └── page.tsx          # Processing history view
+├── layout.tsx                 # Root layout with providers ✅
+├── page.tsx                   # Landing page ✅
+├── providers.tsx              # Client-side providers ✅
+├── globals.css                # Global styles ✅
+├── admin/
+│   ├── layout.tsx            # Authenticated wrapper ✅
+│   ├── page.tsx              # Admin dashboard with tabs (Resources, HTML, Stats) ✅
+│   ├── process/
+│   │   └── page.tsx          # HTML processing interface (future)
+│   └── history/
+│       └── page.tsx          # Processing history view (future)
+└── api/
+    ├── parse/
+    │   └── route.ts          # HTML parsing endpoint ✅
+    └── fetch-html/
+        └── route.ts          # Server-side URL fetcher with rate limiting ✅
 
 components/
 ├── admin/
-│   ├── HtmlInput.tsx         # HTML paste/upload component
-│   ├── ResourceList.tsx      # Display extracted resources
-│   ├── ProcessingStatus.tsx  # Real-time processing updates
-│   └── OutputViewer.tsx      # Modified HTML display
+│   ├── HtmlInput.tsx         # Dual-mode input (URL fetch + paste) ✅
+│   ├── UrlInput.tsx          # URL fetch interface ✅
+│   ├── ParseResults.tsx      # Resource grid with filtering and statistics ✅
+│   ├── ResourcePreview.tsx   # Individual resource cards ✅
+│   ├── HtmlPreview.tsx       # Code viewer with syntax highlighting ✅
+│   ├── ResourceList.tsx      # Display extracted resources (future)
+│   ├── ProcessingStatus.tsx  # Real-time processing updates (future)
+│   └── OutputViewer.tsx      # Modified HTML display (future)
+├── valu/
+│   ├── ValuFrameGuard.tsx    # Iframe enforcement ✅
+│   └── AccessDenied.tsx      # Access denied UI ✅
+├── LoadingSpinner.tsx        # Loading states ✅
 └── ui/
-    ├── Button.tsx            # Radix UI components
+    ├── Button.tsx            # Radix UI components (future)
     ├── Dialog.tsx
     └── Toast.tsx
 ```
@@ -74,21 +90,46 @@ components/
 
 ```
 lib/
-├── parser/
-│   ├── htmlParser.ts         # Cheerio HTML parsing
-│   ├── resourceExtractor.ts  # Extract external URLs
-│   └── urlValidator.ts       # Validate resource URLs
+├── valu-api-singleton.ts     # Valu API instance manager ✅
+├── health-performance-monitor.ts # Health monitoring ✅
+├── loggers.ts                # Logging utilities ✅
+├── parser/                   # ✅ COMPLETE
+│   ├── html-parser.ts        # Cheerio HTML parsing ✅
+│   ├── resource-identifier.ts # Identifies 21 file formats ✅
+│   ├── index.ts              # Public API ✅
+│   ├── demo.ts               # Example usage ✅
+│   ├── README.md             # Full documentation ✅
+│   └── __tests__/            # 181 comprehensive tests across 7 test suites ✅
+├── fetcher/                  # ✅ COMPLETE
+│   ├── url-fetcher.ts        # Server-side HTML fetcher ✅
+│   ├── README.md             # Full documentation ✅
+│   └── __tests__/            # Comprehensive tests ✅
 ├── processor/
-│   ├── resourceDownloader.ts # Download files in parallel
-│   ├── fileValidator.ts      # Validate file types/sizes
-│   └── urlReplacer.ts        # Replace URLs in HTML
+│   ├── resourceDownloader.ts # Download files in parallel (future)
+│   ├── fileValidator.ts      # Validate file types/sizes (future)
+│   └── urlReplacer.ts        # Replace URLs in HTML (future)
 ├── cms/
-│   ├── cmsUploader.ts        # Upload to CMS via Valu API
-│   ├── authHandler.ts        # Handle authentication
-│   └── errorRetry.ts         # Retry failed uploads
+│   ├── cmsStubs.ts           # Mock CMS upload (future)
+│   ├── cmsUploader.ts        # Upload to CMS via Valu API (future)
+│   ├── authHandler.ts        # Handle authentication (future)
+│   └── errorRetry.ts         # Retry failed uploads (future)
 └── db/
-    ├── connection.ts         # MongoDB connection
-    └── models.ts             # Mongoose schemas
+    ├── connection.ts         # MongoDB connection (future)
+    └── models.ts             # Mongoose schemas (future)
+
+contexts/
+├── ValuApiContext.tsx        # Valu API context ✅
+└── AuthContext.tsx           # Auth context ✅
+
+hooks/
+├── useValuApi.ts             # API connection hook ✅
+├── useValuAuth.ts            # Authentication hook ✅
+└── useHtmlParser.ts          # HTML parser state management ✅
+
+utils/
+├── env.ts                    # Environment validation ✅
+├── logger.ts                 # Logging utilities ✅
+└── valuAuthCookie.ts         # Cookie-based user caching ✅
 ```
 
 ## Data Flow
@@ -96,21 +137,47 @@ lib/
 ### 1. Input Phase
 ```typescript
 interface NewsletterInput {
-  html: string;              // Pasted HTML content
+  // URL Fetch Mode (default)
+  url?: string;              // Newsletter URL (S3, web, etc.)
+
+  // Paste Mode (fallback)
+  html?: string;             // Pasted HTML content
+  baseUrl?: string;          // Base URL for resolving relative URLs
+
+  // Common fields
   timestamp: Date;           // Processing start time
-  adminId: string;          // Admin user ID from Valu
+  adminId: string;           // Admin user ID from Valu
 }
 ```
 
 ### 2. Parsing Phase
 ```typescript
 interface ParsedResource {
-  originalUrl: string;       // Original resource URL
-  type: 'pdf' | 'image' | 'document';
-  fileName: string;
-  fileSize?: number;
+  url: string;               // Original URL
+  normalizedUrl: string;     // Absolute URL (resolved from base URL if relative)
+  type: ResourceType;        // PDF, DOCUMENT, IMAGE, UNKNOWN
+  extension: string;         // File extension
+  isExternal: boolean;       // True if not same domain as base URL
+  source: ResourceSource;    // Where it was found (LINK, IMAGE, EMBED, etc.)
+  context?: {                // Optional context
+    altText?: string;
+    title?: string;
+    ariaLabel?: string;
+  };
+}
+
+enum ResourceType {
+  PDF = 'pdf',
+  DOCUMENT = 'document',
+  IMAGE = 'image',
+  UNKNOWN = 'unknown'
 }
 ```
+
+**Key Implementation Details**:
+1. The parser ONLY extracts resources from `<a href>` tags (linked documents like PDFs and Word docs), NOT from `<img src>` tags (inline images). This is intentional - inline images are part of the email's visual content, while only downloadable resources need CMS hosting.
+2. URL fetch mode is the DEFAULT, automatically resolving all relative URLs using the base URL extracted from the fetched HTML.
+3. Paste mode with manual base URL field is available as fallback for cases where URL fetching isn't possible.
 
 ### 3. Processing Phase
 ```typescript

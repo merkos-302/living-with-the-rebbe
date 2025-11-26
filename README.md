@@ -5,18 +5,20 @@ Administrative tool for ChabadUniverse that processes newsletter HTML to central
 
 ## 🎯 Phase 2 MVP - 1-2 Week Sprint
 
-**Current Focus**: Build minimal viable HTML processor with stub CMS integration
-**Timeline**: 1-2 weeks to functional MVP
-**Approach**: Stub-first development - mock CMS API, replace when available
+**Current Status**: Days 2-3 Complete - HTML Input and Parser Implemented
+**Progress**: Core HTML processing engine built with 181 passing tests
+**Next**: Resource downloading, CMS upload, and URL replacement (Phase 3)
 
 ## What This Tool Does
 
-Administrators paste newsletter HTML into the app, which then:
-1. **Extracts** all external resources (PDFs, images, documents)
+Administrators provide newsletter HTML (via URL fetch or paste), which then:
+1. **Extracts** linked documents (PDFs, Word docs) from <a> tags
 2. **Downloads** the resources from their original locations
 3. **Uploads** them to ChabadUniverse CMS via Valu API
 4. **Replaces** original URLs with secure CMS URLs
 5. **Returns** modified HTML ready for distribution
+
+**Important**: The parser ONLY extracts linked documents (PDFs, Word docs from <a> tags), NOT inline images (<img> tags). Inline images remain part of the email content.
 
 The CMS URLs automatically handle viewer authentication - authenticated users see resources in-app, while others are redirected to the website.
 
@@ -53,14 +55,23 @@ The CMS URLs automatically handle viewer authentication - authenticated users se
 - Development mode with test harness
 - ChabadUniverse user format compatibility
 
-**MVP Sprint (🚀 In Progress - Week 1)**:
-- HTML textarea input for paste
-- Cheerio parser to extract resources
-- URL replacement engine
-- CMS stub functions (mock uploads)
-- Basic processing status display
-- Copy-to-clipboard for output
-- Deploy to Vercel
+**Phase 2 Complete (✅ Days 1-3)**:
+- ✅ Valu API authentication with admin verification
+- ✅ Dual-mode HTML input (URL fetch as default, paste as fallback)
+- ✅ Server-side URL fetcher avoiding CORS issues
+- ✅ Base URL field for resolving relative URLs automatically
+- ✅ Cheerio parser extracting ONLY linked documents (PDFs, Word docs from <a> tags)
+- ✅ Resource identification for 21 file formats
+- ✅ Admin dashboard with tabbed interface (Resources, HTML Preview, Statistics)
+- ✅ Preview components with filtering and statistics
+- ✅ API routes: /api/parse and /api/fetch-html with rate limiting
+- ✅ 181 tests - all passing across 7 test suites
+
+**Phase 3 Next (📋 To Be Implemented)**:
+- ⏳ Resource downloader with parallel processing
+- ⏳ CMS upload integration (stub first, then real API)
+- ⏳ URL replacement engine
+- ⏳ Deploy to Vercel
 
 **Future Enhancements (📦 Post-MVP)**:
 - Real CMS API integration
@@ -169,18 +180,32 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 
 ## Project Status
 
-**Current Phase**: Phase 2 MVP Development - Week 1 (Day 1 Complete)
+**Current Phase**: Phase 2 MVP Development - Week 1 (Days 1-3 Complete)
 
-### Week 1 Tasks (Core Processing)
+### Phase 2: HTML Input and Parsing (✅ COMPLETE)
 - [x] **Day 1: Valu API Authentication** ✅ COMPLETE
   - Iframe-only access enforcement
   - Admin permission verification
-  - Cookie-based caching
-  - Health monitoring
+  - Cookie-based caching (24-hour duration)
+  - Health monitoring with adaptive intervals
   - Development test harness
-- [ ] Day 2-3: HTML input component & Cheerio parser
-- [ ] Day 4: Resource extraction & URL replacement
-- [ ] Day 5: CMS stub functions
+  - Multiple fallback methods for user fetching
+- [x] **Days 2-3: HTML Input & Parser** ✅ COMPLETE
+  - Admin dashboard with tabbed interface
+  - Dual-mode input: URL fetch (default) + paste HTML (fallback)
+  - Server-side URL fetcher with automatic relative URL resolution
+  - Base URL field for manual relative URL resolution
+  - Cheerio-based parser (extracts ONLY linked documents from <a> tags)
+  - Resource identifier supporting 21 file formats
+  - Preview components: Resources grid, HTML preview, Statistics
+  - API routes: /api/parse and /api/fetch-html with rate limiting
+  - 181 comprehensive tests - all passing
+
+### Phase 3: Resource Processing (📋 NEXT)
+- [ ] Resource downloader with parallel processing
+- [ ] CMS upload integration (stub functions first)
+- [ ] URL replacement engine
+- [ ] Enhanced output viewer with before/after comparison
 
 ### Week 2 Tasks (UI & Deployment)
 - [ ] Day 6-7: Basic UI with status & output
@@ -197,6 +222,11 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 - ✅ Complete directory structure created
 - ✅ Sample newsletter for testing
 - ✅ **Valu API authentication system (12 files, 1,356 lines)**
+- ✅ **HTML input and parser system (30+ files, 3,000+ lines)**
+- ✅ **Admin dashboard with tabbed interface**
+- ✅ **Dual-mode input: URL fetch (default) + paste HTML (fallback)**
+- ✅ **Server-side URL fetcher avoiding CORS**
+- ✅ **181 comprehensive tests - all passing across 7 test suites**
 
 ## Development Workflow
 

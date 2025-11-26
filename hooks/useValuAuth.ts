@@ -54,14 +54,15 @@ export interface ValuUser {
   firstName?: string;
   lastName?: string;
   roles?: string[];
-  userRoles?: Array<{  // ChabadUniverse format
+  userRoles?: Array<{
+    // ChabadUniverse format
     id: string;
     roleName: string;
     targetType?: string;
     permissions?: string[];
     targetId?: string;
   }>;
-  permissions?: string[] | Record<string, boolean>;  // Can be array or object format
+  permissions?: string[] | Record<string, boolean>; // Can be array or object format
   profile?: {
     displayName?: string;
     profileImage?: string;
@@ -132,13 +133,13 @@ export interface UseValuAuthReturn extends ValuAuthState {
  */
 const mapValuRolesToPortalRoles = (
   valuRoles?: string[],
-  userRoles?: Array<{id: string; roleName: string}>
+  userRoles?: Array<{ id: string; roleName: string }>
 ): string[] => {
   const roleMapping: Record<string, string> = {
     admin: 'admin',
     administrator: 'admin',
     super_admin: 'admin',
-    networkadmin: 'admin',  // ChabadUniverse format
+    networkadmin: 'admin', // ChabadUniverse format
     network_admin: 'admin',
     channel_admin: 'channel_admin',
     moderator: 'moderator',
@@ -160,7 +161,7 @@ const mapValuRolesToPortalRoles = (
 
   // Handle userRoles object array format (ChabadUniverse)
   if (userRoles && Array.isArray(userRoles)) {
-    const extractedRoles = userRoles.map(role => role.id || role.roleName);
+    const extractedRoles = userRoles.map((role) => role.id || role.roleName);
     rolesToMap = [...rolesToMap, ...extractedRoles];
   }
 
@@ -399,7 +400,7 @@ export function useValuAuth(): UseValuAuthReturn {
               try {
                 parsedResult = JSON.parse(result);
                 logger.debug(`Parsed JSON result from "${command}":`, parsedResult);
-              } catch (parseError) {
+              } catch {
                 logger.debug(`Command "${command}" result not JSON, using as-is:`, { result });
                 parsedResult = result as unknown as ValuUser;
               }
@@ -408,10 +409,7 @@ export function useValuAuth(): UseValuAuthReturn {
             // Check if this looks like valid user data
             if (
               parsedResult &&
-              (parsedResult.id ||
-                parsedResult.userId ||
-                parsedResult.name ||
-                parsedResult.email)
+              (parsedResult.id || parsedResult.userId || parsedResult.name || parsedResult.email)
             ) {
               logger.info(`Successfully got user data with command: "${command}"`);
               return parsedResult as ValuUser;
@@ -536,7 +534,12 @@ export function useValuAuth(): UseValuAuthReturn {
           valuUserId: portalUser.valuUserId,
         });
       } catch (cacheError) {
-        logger.warn('Failed to cache user data', cacheError instanceof Error ? { error: cacheError.message } : { error: String(cacheError) });
+        logger.warn(
+          'Failed to cache user data',
+          cacheError instanceof Error
+            ? { error: cacheError.message }
+            : { error: String(cacheError) }
+        );
         // Don't fail authentication if caching fails
       }
 
@@ -599,7 +602,12 @@ export function useValuAuth(): UseValuAuthReturn {
         refreshValuCache();
         logger.debug('Cache timestamp refreshed after successful API refresh');
       } catch (cacheError) {
-        logger.warn('Failed to refresh cache timestamp', cacheError instanceof Error ? { error: cacheError.message } : { error: String(cacheError) });
+        logger.warn(
+          'Failed to refresh cache timestamp',
+          cacheError instanceof Error
+            ? { error: cacheError.message }
+            : { error: String(cacheError) }
+        );
         // Don't fail the refresh if cache update fails
       }
     }
@@ -633,7 +641,12 @@ export function useValuAuth(): UseValuAuthReturn {
         clearValuUser();
         logger.debug('User cache cleared successfully');
       } catch (cacheError) {
-        logger.warn('Failed to clear user cache', cacheError instanceof Error ? { error: cacheError.message } : { error: String(cacheError) });
+        logger.warn(
+          'Failed to clear user cache',
+          cacheError instanceof Error
+            ? { error: cacheError.message }
+            : { error: String(cacheError) }
+        );
         // Don't fail logout if cache clearing fails
       }
 
@@ -698,13 +711,28 @@ export function useValuAuth(): UseValuAuthReturn {
           logger.debug('No user found via API');
         }
       } catch (error) {
-        logger.debug('API authentication attempt failed', error instanceof Error ? { error: error.message } : { error: String(error) });
+        logger.debug(
+          'API authentication attempt failed',
+          error instanceof Error ? { error: error.message } : { error: String(error) }
+        );
       }
 
       setIsLoading(false);
-    }, 2000); // 2 seconds for API to stabilize
+    }, 1000); // Reduced to 1 second for faster authentication
 
-    return () => clearTimeout(timer);
+    // Fallback timeout: Stop loading after 5 seconds no matter what
+    const fallbackTimer = setTimeout(() => {
+      logger.warn('Authentication timeout reached after 5 seconds - stopping loading state');
+      setIsLoading(false);
+      if (!user) {
+        setError('Authentication timeout - please try refreshing the page');
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(fallbackTimer);
+    };
   }, [isInIframe, user, authenticateWithValu, isValuConnected, isValuReady, isNavigatingApp]);
 
   /**

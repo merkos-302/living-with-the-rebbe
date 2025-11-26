@@ -32,13 +32,21 @@ To update all documentation files:
    - `API_SPECIFICATION.md` (API specification document)
    - `FUTURE_FEATURES.md` (future features roadmap)
    - `docs/CLAUDE-CODE-WORKFLOW.md` (comprehensive development workflow guide)
-   - `docs/ARCHIVE/` folder containing historical documentation:
-     - `DEPLOYMENT_GUIDE.md`
-     - `DEVELOPMENT_GUIDE.md`
-     - `MVP_PLAN.md`
-     - `README.md`
-     - `TESTING_PLAN.md`
-     - `WEEK_1_SPRINT.md`
+   - `docs/ARCHIVE/` folder containing historical documentation
+   - `PHASE2_MVP.md` (Phase 2 MVP implementation plan)
+   - `PARSER_IMPLEMENTATION.md` (parser implementation details)
+   - `PROJECT_BRIEF.md` (high-level project overview)
+   - `CMS_SUPPORT_PLAN.md` (CMS integration planning)
+   - `lib/parser/README.md` (parser module documentation)
+   - `lib/parser/ARCHITECTURE.md` (parser architecture details)
+   - `lib/parser/EXAMPLE.md` (parser usage examples)
+   - `lib/parser/INDEX.md` (parser module index)
+   - `lib/parser/INTEGRATION.md` (parser integration guide)
+   - `lib/parser/IMPLEMENTATION_SUMMARY.md` (parser implementation summary)
+   - `docs/DAY1_AUTHENTICATION_IMPLEMENTATION.md` (authentication implementation notes)
+   - `docs/TESTING_AUTHENTICATION.md` (authentication testing guide)
+   - `docs/VALU_API_TIMING_FIX.md` (Valu API timing fix documentation)
+   - `docs/VALU_AUTHENTICATION_REFERENCE.md` (Valu authentication reference)
    - `.claude/agents/` specialized AI agents:
      - `valu-iframe-specialist.md`
      - `media-processor-agent.md`
@@ -64,7 +72,7 @@ To update all documentation files:
    - Updates API endpoint documentation
    - Updates database schema documentation
    - Updates project structure diagrams
-   - Updates test coverage information (57 test files with 859 tests - 854 passing, 5 skipped)
+   - Updates test coverage information (68 tests - all passing)
    - Updates environment variable requirements
    - Maintains consistent information across all docs
 
