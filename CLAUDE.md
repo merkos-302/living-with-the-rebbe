@@ -40,8 +40,11 @@ The MVP focuses on delivering a functional HTML processing tool within 1-2 weeks
 - **Lucide React** for icons
 
 ### Valu/ChabadUniverse Integration
-- **@arkeytyp/valu-api v1.1.0** for iframe communication and authentication ✅
-- **CMS API** for resource upload (PUT endpoints) (to be implemented)
+- **@arkeytyp/valu-api v1.1.1** for iframe communication, authentication, and file storage ✅
+- **CMS via Service Intents** - Real API available for file upload/URL generation ✅
+  - `ApplicationStorage.resource-upload` - Upload files
+  - `ApplicationStorage.resource-search` - List/search files (for deduplication)
+  - `Resources.generate-public-url` - Get shareable URLs (handles auth automatically)
 - **Admin-only access** via Valu authentication ✅
 - **Cookie-based caching** for fast user loading ✅
 - **Health monitoring** with adaptive intervals ✅
@@ -111,19 +114,29 @@ The CMS URLs returned (e.g., `https://cms.chabaduniverse.com/api/resource/abc123
 - Redirect public users to website view
 - Track resource access for analytics
 
-### API Integration (Phase 2 MVP)
-For the MVP, we use stub functions that simulate the CMS API:
-- **Stub Upload**: Mock function returns fake CMS URLs
-- **Pattern**: `https://cms.chabaduniverse.com/api/resource/mock-{id}`
-- **Migration Path**: Replace stubs with real API when available
+### API Integration (Phase 3 - Real Valu API)
+The Valu API v1.1.1 provides production-ready file storage via **Service Intents**:
 
-### API Integration (Production)
-When the real CMS API is available:
-- **Resource Upload**: PUT to ChabadUniverse CMS, returns new URL
-- **Authentication**: Via Valu getCurrentUser() for admin verification
-- **Error Handling**: Retry logic for failed uploads
-- **Access Control**: Files can be public, private, or permissioned
-- **Redirect Logic**: CMS URLs redirect based on auth status
+```typescript
+// Upload file to CMS
+const uploadIntent = new Intent("ApplicationStorage", "resource-upload", {
+  files: fileList  // FileList from converted ArrayBuffer
+});
+const result = await valuApi.callService(uploadIntent);
+
+// Get public URL (handles auth automatically)
+const urlIntent = new Intent("Resources", "generate-public-url", {
+  resourceId: "uploaded-resource-id"
+});
+const publicUrl = await valuApi.callService(urlIntent);
+```
+
+**Key Features**:
+- **File Upload**: Via `ApplicationStorage.resource-upload`
+- **Deduplication**: Check existing files via `resource-search` before uploading
+- **Public URLs**: Via `Resources.generate-public-url` - automatically handles auth redirects
+- **Error Handling**: Retry 2-3x with exponential backoff, then skip and continue
+- **Concurrency**: Process 3 resources in parallel
 
 ## Key Considerations
 - **Admin-only tool** - No public access
@@ -186,9 +199,22 @@ Follow the same provider pattern as universe-portal in root layout:
   - `/lib/fetcher` - URL fetching logic ✅ COMPLETE
     - `url-fetcher.ts` - Server-side HTML fetcher with relative URL resolution ✅
     - Comprehensive tests for S3 URLs and various URL formats ✅
-  - `/lib/cms` - CMS upload integration (to be created)
-  - `/lib/processor` - Resource processing (to be created)
-  - `/lib/db` - Database connection (to be created)
+  - `/lib/downloader` - Resource downloading (Phase 3)
+    - `resource-downloader.ts` - Download files from URLs
+    - `index.ts` - Public exports
+  - `/lib/cms` - CMS upload via Valu API (Phase 3)
+    - `cms-uploader.ts` - Upload using Service Intents
+    - `file-converter.ts` - ArrayBuffer → File/FileList conversion
+    - `types.ts` - TypeScript types
+    - `index.ts` - Public exports
+  - `/lib/replacer` - URL replacement (Phase 3)
+    - `url-replacer.ts` - Cheerio-based URL swapping
+    - `index.ts` - Public exports
+  - `/lib/processor` - Processing orchestration (Phase 3)
+    - `resource-processor.ts` - Full pipeline coordinator
+    - `types.ts` - Processing types
+    - `index.ts` - Public exports
+  - `/lib/db` - Database connection (future)
 - `/contexts` - React contexts ✅ Directory created
   - `ValuApiContext.tsx` - Valu API context ✅
   - `AuthContext.tsx` - Authentication context ✅
@@ -280,13 +306,36 @@ The parser ONLY extracts linked documents (PDFs, Word docs, etc.) from `<a href>
 **Key Feature - Dual-Mode Input**:
 URL fetch is the DEFAULT mode, automatically resolving all relative URLs using the base URL. Paste mode with base URL field is available as fallback for cases where URL fetching isn't possible.
 
-**Phase 3: Resource Processing** (NEXT)
-- [ ] Resource downloader with parallel processing
-- [ ] File type validation
-- [ ] URL mapping system (original → CMS)
-- [ ] HTML URL replacement engine
-- [ ] CMS stub functions for testing
-- [ ] Test with sample newsletter
+**Phase 3: Resource Processing** (NEXT - Using Real Valu API)
+
+**Step 1: Update Dependencies**
+- [ ] Update `@arkeytyp/valu-api` from 1.1.0 → 1.1.1 for Service Intents
+
+**Step 2: Resource Downloader (`/lib/downloader/`)**
+- [ ] `resource-downloader.ts` - Download files from original URLs
+- [ ] Server-side API route `/api/download-resource` to avoid CORS
+- [ ] Parallel downloads with concurrency limit (3)
+- [ ] Retry logic with exponential backoff
+
+**Step 3: CMS Upload Service (`/lib/cms/`)**
+- [ ] `cms-uploader.ts` - Upload to Valu via Service Intents
+- [ ] `file-converter.ts` - Convert ArrayBuffer → File/FileList
+- [ ] Check for duplicates using `resource-search` before upload
+- [ ] Get public URLs via `generate-public-url`
+
+**Step 4: URL Replacement Engine (`/lib/replacer/`)**
+- [ ] `url-replacer.ts` - Swap URLs in HTML using Cheerio
+- [ ] Preserve all HTML attributes
+- [ ] Track replacement statistics
+
+**Step 5: Processing Orchestrator (`/lib/processor/`)**
+- [ ] `resource-processor.ts` - Full pipeline: Parse → Download → Upload → Replace
+- [ ] Processing hook `useProcessing.ts` for React state management
+
+**Step 6: UI Updates**
+- [ ] Processing progress indicators
+- [ ] Before/after HTML preview
+- [ ] Copy-to-clipboard for output
 
 ### Week 2: UI & Polish
 **Days 6-7: Basic Interface**
@@ -356,17 +405,28 @@ URL fetch is the DEFAULT mode, automatically resolving all relative URLs using t
   - 181 comprehensive tests - all passing across 7 test suites
   - Full documentation in /lib/parser/README.md and /lib/fetcher/README.md
 
-### 🎯 Phase 3: Resource Processing (NEXT)
-- [ ] Resource downloader with parallel processing
-- [ ] CMS upload integration (stub functions first)
-- [ ] URL replacement engine
-- [ ] Enhanced admin UI with processing status
+### 🎯 Phase 3: Resource Processing (NEXT - Real Valu API)
+
+**Dependencies**:
+- [ ] Update `@arkeytyp/valu-api` 1.1.0 → 1.1.1
+
+**Core Modules** (GitHub #31):
+- [ ] `/lib/downloader/` - Download resources from original URLs
+- [ ] `/lib/cms/` - Upload to Valu CMS via Service Intents
+- [ ] `/lib/replacer/` - URL replacement engine (GitHub #32)
+- [ ] `/lib/processor/` - Pipeline orchestrator
+- [ ] `/hooks/useProcessing.ts` - React state management
+
+**API Routes**:
+- [ ] `/api/download-resource` - Server-side download (avoid CORS)
+- [ ] `/api/process` - Full processing endpoint
+
+**UI Updates** (GitHub #34):
+- [ ] Processing progress indicators
+- [ ] Before/after HTML preview
 - [ ] Copy-to-clipboard for output
-- [ ] Integration testing
-- [ ] Deploy to Vercel
 
 ### 📦 Future Enhancements (Post-MVP)
-- Real CMS API integration
 - MongoDB processing history
 - Before/after preview
 - Batch processing
@@ -374,10 +434,16 @@ URL fetch is the DEFAULT mode, automatically resolving all relative URLs using t
 - Error recovery UI
 - Analytics dashboard
 
-### 🚀 Getting Started for Phase 2 MVP
-1. Review this document and PHASE2_MVP.md
-2. Run `npm install` to ensure dependencies
-3. Run `npm run dev` to start development
-4. Begin with `/app/admin/page.tsx` - the HTML input interface
-5. Use stub functions for CMS API
+### 🚀 Getting Started for Phase 3
+1. Review this document and the plan at `/.claude/plans/rippling-exploring-rain.md`
+2. Update dependency: `npm install @arkeytyp/valu-api@1.1.1`
+3. Review Valu API file storage docs at `../valu-api/FILE_STORAGE_API.md`
+4. Start with GitHub issue #31 - Integrate Valu API for CMS uploads
+5. Create modules in order: downloader → cms → replacer → processor
 6. Test with `/public/samples/5785/yom_kippur.html`
+
+**Key Reference Files**:
+- `/lib/parser/html-parser.ts` - Understand ParsedResource structure
+- `/types/parser.ts` - Resource type definitions
+- `/hooks/useValuAuth.ts` - How Valu API is accessed
+- `../valu-api/FILE_STORAGE_API.md` - Valu file storage API

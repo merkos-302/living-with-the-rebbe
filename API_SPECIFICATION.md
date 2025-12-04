@@ -5,46 +5,55 @@
 
 This document specifies the API endpoints required from the ChabadUniverse platform to enable the Living with the Rebbe admin tool functionality.
 
-**Status**: ⚠️ **NOT IMPLEMENTED** - This is a specification for APIs that need to be created.
+**Status**: ✅ **AVAILABLE** - The Valu API v1.1.1 provides file storage via Service Intents (see below).
 
-## 🚀 Phase 2 MVP Approach - Stub Functions
+## 🚀 Phase 3 Implementation - Real Valu API
 
-**For the Phase 2 MVP (1-2 week sprint), we are using stub functions instead of waiting for the real API.**
+**The Valu API v1.1.1 now provides production-ready file storage via Service Intents.**
 
-### MVP Stub Implementation
+### Available File Storage API
 
-During MVP development, all API calls will be handled by stub functions in `/lib/cms/cmsStubs.ts`:
+The `@arkeytyp/valu-api` package provides these services:
+
+| Service | Action | Description |
+|---------|--------|-------------|
+| `ApplicationStorage` | `resource-upload` | Upload files (accepts FileList) |
+| `ApplicationStorage` | `resource-search` | List/search files (for deduplication) |
+| `ApplicationStorage` | `resource-delete` | Delete files |
+| `Resources` | `get-thumbnail-url` | Get image thumbnails |
+| `Resources` | `generate-public-url` | Get shareable URLs (handles auth) |
+
+### Usage Example
 
 ```typescript
-// Example stub function for media upload
-export async function uploadToCMS(resource: ParsedResource): Promise<CMSUploadResponse> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 100));
+import { ValuApi, Intent } from "@arkeytyp/valu-api";
 
-  // Return mock CMS URL
-  return {
-    success: true,
-    cmsUrl: `https://cms.chabaduniverse.com/api/resource/mock-${uuidv4()}`,
-    resourceId: `mock-${uuidv4()}`
-  };
-}
+// Upload files
+const uploadIntent = new Intent("ApplicationStorage", "resource-upload", {
+  files: fileList  // FileList from File input or converted ArrayBuffer
+});
+const result = await valuApi.callService(uploadIntent);
+
+// Check for duplicates before uploading
+const searchIntent = new Intent("ApplicationStorage", "resource-search", {
+  size: 50  // Max results
+});
+const existing = await valuApi.callService(searchIntent);
+
+// Get public URL (handles auth automatically)
+const urlIntent = new Intent("Resources", "generate-public-url", {
+  resourceId: "your-resource-id"
+});
+const publicUrl = await valuApi.callService(urlIntent);
 ```
 
-### Migration Path
+### Key Features
+- **Auto-auth URLs**: Public URLs from `generate-public-url` automatically redirect based on user auth status
+- **Deduplication**: Use `resource-search` to check if file already exists by filename
+- **File scoping**: Each application has its own storage namespace
 
-When the real ChabadUniverse API becomes available:
-1. Replace stub functions in `/lib/cms/cmsStubs.ts` with real API calls
-2. Update authentication to use real Valu API tokens
-3. Add proper error handling and retry logic
-4. Enable MongoDB for processing history
-
-### MVP Stub Endpoints
-
-For MVP, the following endpoints are stubbed:
-- `uploadToCMS()` - Returns mock CMS URLs
-- `checkMediaExists()` - Always returns false
-- `createPost()` - Returns mock post ID
-- `getChannelInfo()` - Returns mock channel data
+### Reference Documentation
+See `../valu-api/FILE_STORAGE_API.md` for complete API documentation.
 
 ---
 
