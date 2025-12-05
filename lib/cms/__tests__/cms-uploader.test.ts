@@ -278,7 +278,8 @@ describe('CMS Uploader', () => {
       const result = await uploadToCMS(download, api, { checkDuplicates: false });
 
       expect(result.success).toBe(true);
-      expect(result.cmsUrl).toBe('https://cms.chabaduniverse.com/api/resource/mock-123');
+      // Fallback URL uses the correct Roomful API format
+      expect(result.cmsUrl).toBe('https://api.roomful.net/api/v0/resource/mock-123');
     });
   });
 
