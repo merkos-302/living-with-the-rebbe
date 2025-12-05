@@ -5,46 +5,84 @@
 
 This document specifies the API endpoints required from the ChabadUniverse platform to enable the Living with the Rebbe admin tool functionality.
 
-**Status**: ⚠️ **NOT IMPLEMENTED** - This is a specification for APIs that need to be created.
+**Status**: ✅ **AVAILABLE** - The Valu API v1.1.1 provides file storage via Service Intents (see below).
 
-## 🚀 Phase 2 MVP Approach - Stub Functions
+## 🚀 Phase 3 Implementation Complete - Real Valu API
 
-**For the Phase 2 MVP (1-2 week sprint), we are using stub functions instead of waiting for the real API.**
+**Status**: ✅ IMPLEMENTED - The full resource processing pipeline is operational.
 
-### MVP Stub Implementation
+### Implementation Summary
 
-During MVP development, all API calls will be handled by stub functions in `/lib/cms/cmsStubs.ts`:
+| Module | Status | Tests |
+|--------|--------|-------|
+| Resource Downloader | ✅ Complete | 23 |
+| CMS Upload Service | ✅ Complete | 56 |
+| URL Replacer | ✅ Complete | 36 |
+| Pipeline Orchestrator | ✅ Complete | - |
+| **Total** | **✅ Complete** | **305** |
 
+### Valu API v1.1.1 Integration
+
+The `@arkeytyp/valu-api` package provides these services:
+
+| Service | Action | Description | Status |
+|---------|--------|-------------|--------|
+| `ApplicationStorage` | `resource-upload` | Upload files (accepts FileList) | ✅ Implemented |
+| `ApplicationStorage` | `resource-search` | List/search files (for deduplication) | ✅ Implemented |
+| `ApplicationStorage` | `resource-delete` | Delete files | Available |
+| `Resources` | `get-thumbnail-url` | Get image thumbnails | Available |
+| `Resources` | `generate-public-url` | Get shareable URLs (handles auth) | ✅ Implemented |
+
+### Actual Response Formats
+
+**Upload Response** (resolved/rejected format):
 ```typescript
-// Example stub function for media upload
-export async function uploadToCMS(resource: ParsedResource): Promise<CMSUploadResponse> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-
-  // Return mock CMS URL
-  return {
-    success: true,
-    cmsUrl: `https://cms.chabaduniverse.com/api/resource/mock-${uuidv4()}`,
-    resourceId: `mock-${uuidv4()}`
-  };
-}
+const result = await valuApi.callService(uploadIntent);
+// Response: { resolved: [{ uuid, id, metadata, thumbnail }], rejected: [] }
+const resourceId = result.resolved[0].uuid || result.resolved[0].id;
 ```
 
-### Migration Path
+**Public URL Response** (returns string directly):
+```typescript
+const publicUrl = await valuApi.callService(urlIntent);
+// Response: "https://api.roomful.net/api/v0/resource/{uuid}"
+// NOT wrapped in object - URL string returned directly
+```
 
-When the real ChabadUniverse API becomes available:
-1. Replace stub functions in `/lib/cms/cmsStubs.ts` with real API calls
-2. Update authentication to use real Valu API tokens
-3. Add proper error handling and retry logic
-4. Enable MongoDB for processing history
+### Usage Example
 
-### MVP Stub Endpoints
+```typescript
+import { ValuApi, Intent } from "@arkeytyp/valu-api";
 
-For MVP, the following endpoints are stubbed:
-- `uploadToCMS()` - Returns mock CMS URLs
-- `checkMediaExists()` - Always returns false
-- `createPost()` - Returns mock post ID
-- `getChannelInfo()` - Returns mock channel data
+// Upload files
+const uploadIntent = new Intent("ApplicationStorage", "resource-upload", {
+  files: fileList  // FileList created via DataTransfer API
+});
+const result = await valuApi.callService(uploadIntent);
+const resourceId = result.resolved[0].uuid;
+
+// Check for duplicates before uploading
+const searchIntent = new Intent("ApplicationStorage", "resource-search", {
+  size: 50  // Max results
+});
+const existing = await valuApi.callService(searchIntent);
+
+// Get public URL (returns string directly)
+const urlIntent = new Intent("Resources", "generate-public-url", {
+  resourceId: resourceId
+});
+const publicUrl = await valuApi.callService(urlIntent);
+// publicUrl = "https://api.roomful.net/api/v0/resource/{uuid}"
+```
+
+### Key Implementation Notes
+- **Upload Response**: Uses `{ resolved, rejected }` format, NOT legacy `{ success, data }`
+- **Public URLs**: Returns URL string directly, NOT wrapped in object
+- **FileList Creation**: Must use DataTransfer API for postMessage compatibility
+- **URL Domain**: Actual URLs are from `api.roomful.net`, not `cms.chabaduniverse.com`
+
+### Known Issue
+- **CMS 801 Error**: Some uploaded file URLs return 801 from `api.roomful.net`. This is a server-side Roomful API issue, not a client-side bug. The upload pipeline works correctly.
 
 ---
 

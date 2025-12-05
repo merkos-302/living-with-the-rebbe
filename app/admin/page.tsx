@@ -4,9 +4,16 @@ import { useState, useEffect } from 'react';
 import { HtmlInput } from '@/components/admin/HtmlInput';
 import { ParseResults } from '@/components/admin/ParseResults';
 import { HtmlPreview } from '@/components/admin/HtmlPreview';
+import { ProcessingProgress } from '@/components/admin/ProcessingProgress';
+import { ProcessedOutput } from '@/components/admin/ProcessedOutput';
 import { useHtmlParser } from '@/hooks/useHtmlParser';
+import { useProcessing } from '@/hooks/useProcessing';
+import { useValuApi } from '@/hooks/useValuApi';
+import { valuApiSingleton } from '@/lib/valu-api-singleton';
 import { logger } from '@/utils/logger';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
+import { ProcessingStage } from '@/lib/processor/types';
+import { Play, RotateCcw } from 'lucide-react';
 
 /**
  * Admin Dashboard Page
@@ -28,7 +35,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 
 export default function AdminPage() {
   const { parse, isLoading, result, resources, error: parserError, clear } = useHtmlParser();
+  const { isReady: isValuReady, isConnected: isValuConnected } = useValuApi();
+  // Get the API instance - will be available once isReady is true
+  const valuApi = isValuReady ? valuApiSingleton.getApi() : null;
+  const {
+    stage,
+    progress,
+    isProcessing,
+    error: processingError,
+    result: processingResult,
+    processNewsletter,
+    reset: resetProcessing,
+  } = useProcessing(valuApi);
+
   const [inputHtml, setInputHtml] = useState<string>('');
+  const [baseUrl, setBaseUrl] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('resources');
   const [needsBaseUrl, setNeedsBaseUrl] = useState<boolean>(false);
 
@@ -49,6 +70,7 @@ export default function AdminPage() {
     });
 
     setInputHtml(html);
+    setBaseUrl(providedBaseUrl || '');
     setNeedsBaseUrl(false); // Reset the flag
 
     await parse(html, {
@@ -63,9 +85,32 @@ export default function AdminPage() {
     });
   };
 
+  const handleProcess = async () => {
+    if (!inputHtml) {
+      logger.error('Cannot process: No HTML provided');
+      return;
+    }
+
+    logger.info('Starting newsletter processing', {
+      htmlLength: inputHtml.length,
+      resourceCount: resources.length,
+      baseUrl: baseUrl || 'none',
+    });
+
+    try {
+      await processNewsletter(inputHtml, baseUrl);
+      // Switch to output tab on success
+      setActiveTab('output');
+    } catch (error: any) {
+      logger.error('Newsletter processing failed', error);
+    }
+  };
+
   const handleReset = () => {
     clear();
+    resetProcessing();
     setInputHtml('');
+    setBaseUrl('');
     setNeedsBaseUrl(false);
     setActiveTab('resources');
     logger.info('Parsing results cleared');
@@ -118,23 +163,95 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Parsing Results */}
-      {result && resources.length > 0 && (
+      {/* Processing Progress */}
+      {isProcessing && (
+        <ProcessingProgress
+          stage={stage}
+          progress={progress}
+          resourceCount={resources.filter((r) => r).length}
+          totalResources={resources.length}
+        />
+      )}
+
+      {/* Processing Error */}
+      {processingError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-start">
+            <svg
+              className="w-6 h-6 text-red-600 mr-3 mt-0.5 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <div>
+              <h3 className="text-lg font-semibold text-red-900 mb-2">Processing Error</h3>
+              <p className="text-red-700">{processingError}</p>
+              <button
+                onClick={handleProcess}
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Retry Processing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Parsing Results - Show when we have results and not currently processing or complete */}
+      {result && resources.length > 0 && !isProcessing && stage !== ProcessingStage.COMPLETE && (
         <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
+          {/* Action Header - Always visible at top */}
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
             <div>
               <h3 className="text-xl font-semibold text-gray-900">Parsing Complete</h3>
               <p className="text-sm text-gray-600 mt-1">
-                Found {resources.length} resource{resources.length !== 1 ? 's' : ''} in the HTML
+                Found {resources.length} resource{resources.length !== 1 ? 's' : ''} ready for
+                processing
               </p>
             </div>
-            <button
-              onClick={handleReset}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            >
-              Parse Another
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleProcess}
+                disabled={isProcessing || !valuApi}
+                className="inline-flex items-center gap-2 px-6 py-3 text-base font-semibold text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                title={
+                  !valuApi
+                    ? isValuConnected
+                      ? 'Waiting for API to be ready...'
+                      : 'Valu API not connected'
+                    : 'Start processing resources'
+                }
+              >
+                <Play className="w-5 h-5" />
+                Process Newsletter
+              </button>
+              <button
+                onClick={handleReset}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Parse Another
+              </button>
+            </div>
           </div>
+
+          {/* Valu API Warning */}
+          {!valuApi && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                <strong>Note:</strong>{' '}
+                {isValuConnected
+                  ? 'Valu API is connecting...'
+                  : 'Valu API is not connected. Processing requires authentication within ChabadUniverse.'}
+              </p>
+            </div>
+          )}
 
           {/* Tabs for different views */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -220,6 +337,27 @@ export default function AdminPage() {
               </div>
             </TabsContent>
           </Tabs>
+        </div>
+      )}
+
+      {/* Processing Complete - Output */}
+      {processingResult && stage === ProcessingStage.COMPLETE && (
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900">Processing Complete</h3>
+              <p className="text-sm text-gray-600 mt-1">Newsletter ready for distribution</p>
+            </div>
+            <button
+              onClick={handleReset}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Process Another
+            </button>
+          </div>
+
+          <ProcessedOutput result={processingResult} />
         </div>
       )}
 

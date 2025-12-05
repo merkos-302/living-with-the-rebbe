@@ -215,7 +215,10 @@ class ValuApiSingleton {
                 console.warn(
                   'ValuApiSingleton: Caught postRunResult error in sendIntent, returning success'
                 );
-                return { success: true, data: { warning: 'postRunResult error suppressed', intent } };
+                return {
+                  success: true,
+                  data: { warning: 'postRunResult error suppressed', intent },
+                };
               }
               throw error;
             }
@@ -239,7 +242,9 @@ class ValuApiSingleton {
       // IMPORTANT: We keep the API instance alive - never destroy it
       setTimeout(() => {
         if (!hasNotified) {
-          console.log('ValuApiSingleton: Timeout - API_READY not received, but keeping instance alive');
+          console.log(
+            'ValuApiSingleton: Timeout - API_READY not received, but keeping instance alive'
+          );
           hasNotified = true;
           // Still pass the API instance - it might connect later
           this.notifyListeners(this.valuApi);
@@ -381,22 +386,35 @@ class ValuApiSingleton {
         });
       }
 
-      // Step 4: Test API capability with a lightweight operation (optimized)
+      // Step 4: Check the API connected property (from ValuSampleApp pattern)
       try {
-        // Use a minimal API test that doesn't require network calls
-        const apiTest = (this.valuApi as any).postToValuApp;
-        if (typeof apiTest !== 'function') {
-          health = 'degraded';
-          details = 'API instance exists but postToValuApp method unavailable';
-        } else {
-          // API appears functional
+        // Check the connected property - this is the actual indicator
+        const isConnected = (this.valuApi as any).connected;
+
+        if (isConnected === true) {
+          // API is connected and ready
           health = 'healthy';
-          details = 'API instance functional and ready';
+          details = 'API instance connected and ready';
           this.lastSuccessfulOperation = now;
+        } else if (isConnected === false) {
+          // API exists but not yet connected - waiting for API_READY
+          health = 'degraded';
+          details = 'API instance exists but not yet connected (waiting for API_READY)';
+        } else {
+          // Connected property not available - check if we've had successful operations
+          if (this.lastSuccessfulOperation && now - this.lastSuccessfulOperation < 60000) {
+            // We've had a successful operation in the last minute, so API is working
+            health = 'healthy';
+            details = 'API functional (verified by recent successful operation)';
+          } else {
+            // Unknown state - API exists but can't verify connection
+            health = 'unknown';
+            details = 'API instance exists but connection status unknown';
+          }
         }
       } catch (error: any) {
         health = 'degraded';
-        details = `API test failed: ${error.message}`;
+        details = `API check failed: ${error.message}`;
       }
     } catch (error: any) {
       health = 'disconnected';

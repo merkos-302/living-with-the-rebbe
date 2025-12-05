@@ -63,8 +63,12 @@ app/
 └── api/
     ├── parse/
     │   └── route.ts          # HTML parsing endpoint ✅
-    └── fetch-html/
-        └── route.ts          # Server-side URL fetcher with rate limiting ✅
+    ├── fetch-html/
+    │   └── route.ts          # Server-side URL fetcher with rate limiting ✅
+    ├── process/
+    │   └── route.ts          # Full processing pipeline endpoint ✅
+    └── download-resource/
+        └── route.ts          # Server-side resource download (avoid CORS) ✅
 
 components/
 ├── admin/
@@ -73,9 +77,9 @@ components/
 │   ├── ParseResults.tsx      # Resource grid with filtering and statistics ✅
 │   ├── ResourcePreview.tsx   # Individual resource cards ✅
 │   ├── HtmlPreview.tsx       # Code viewer with syntax highlighting ✅
-│   ├── ResourceList.tsx      # Display extracted resources (future)
-│   ├── ProcessingStatus.tsx  # Real-time processing updates (future)
-│   └── OutputViewer.tsx      # Modified HTML display (future)
+│   ├── ProcessingProgress.tsx # Processing progress indicators ✅
+│   ├── ProcessedOutput.tsx   # Output HTML viewer with copy button ✅
+│   └── README.md             # Component documentation ✅
 ├── valu/
 │   ├── ValuFrameGuard.tsx    # Iframe enforcement ✅
 │   └── AccessDenied.tsx      # Access denied UI ✅
@@ -104,15 +108,23 @@ lib/
 │   ├── url-fetcher.ts        # Server-side HTML fetcher ✅
 │   ├── README.md             # Full documentation ✅
 │   └── __tests__/            # Comprehensive tests ✅
-├── processor/
-│   ├── resourceDownloader.ts # Download files in parallel (future)
-│   ├── fileValidator.ts      # Validate file types/sizes (future)
-│   └── urlReplacer.ts        # Replace URLs in HTML (future)
-├── cms/
-│   ├── cmsStubs.ts           # Mock CMS upload (future)
-│   ├── cmsUploader.ts        # Upload to CMS via Valu API (future)
-│   ├── authHandler.ts        # Handle authentication (future)
-│   └── errorRetry.ts         # Retry failed uploads (future)
+├── downloader/                  # ✅ COMPLETE (23 tests)
+│   ├── resource-downloader.ts # Download files with retry logic ✅
+│   ├── types.ts               # TypeScript interfaces ✅
+│   └── index.ts               # Public exports ✅
+├── cms/                         # ✅ COMPLETE (56 tests)
+│   ├── cms-uploader.ts        # Upload to CMS via Valu Service Intents ✅
+│   ├── file-converter.ts      # ArrayBuffer → File/FileList conversion ✅
+│   ├── types.ts               # TypeScript interfaces ✅
+│   └── index.ts               # Public exports ✅
+├── replacer/                    # ✅ COMPLETE (36 tests)
+│   ├── url-replacer.ts        # Cheerio-based URL swapping ✅
+│   ├── types.ts               # TypeScript interfaces ✅
+│   └── index.ts               # Public exports ✅
+├── processor/                   # ✅ COMPLETE
+│   ├── resource-processor.ts  # Full pipeline coordinator ✅
+│   ├── types.ts               # Processing types ✅
+│   └── index.ts               # Public exports ✅
 └── db/
     ├── connection.ts         # MongoDB connection (future)
     └── models.ts             # Mongoose schemas (future)
@@ -124,7 +136,8 @@ contexts/
 hooks/
 ├── useValuApi.ts             # API connection hook ✅
 ├── useValuAuth.ts            # Authentication hook ✅
-└── useHtmlParser.ts          # HTML parser state management ✅
+├── useHtmlParser.ts          # HTML parser state management ✅
+└── useProcessing.ts          # Processing state management ✅
 
 utils/
 ├── env.ts                    # Environment validation ✅

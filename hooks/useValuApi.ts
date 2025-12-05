@@ -76,7 +76,7 @@ export function useValuApi(): UseValuApiReturn {
       if (apiReadyListenerRef.current) {
         try {
           api.removeEventListener('API_READY', apiReadyListenerRef.current);
-        } catch (e) {
+        } catch {
           // Ignore errors
         }
       }
@@ -107,15 +107,19 @@ export function useValuApi(): UseValuApiReturn {
       setTimeout(() => {
         if (!valuApiRef.current) return;
 
-        // Check if we're actually ready by testing for postToValuApp method
-        const hasPostMethod = valuApiRef.current.postToValuApp &&
-                            typeof valuApiRef.current.postToValuApp === 'function';
+        // Check if we're actually ready by testing the connected property (from ValuSampleApp pattern)
+        const isApiConnected = valuApiRef.current.connected === true;
 
-        if (hasPostMethod) {
-          console.log('useValuApi: Fallback timeout - API appears ready, setting isReady');
+        if (isApiConnected) {
+          console.log(
+            'useValuApi: Fallback timeout - API connected property is true, setting isReady'
+          );
           setIsReady(true);
         } else {
-          console.warn('useValuApi: Fallback timeout reached but postToValuApp still not available');
+          console.log(
+            'useValuApi: Fallback timeout reached, API connected:',
+            valuApiRef.current.connected
+          );
           // Set ready anyway to prevent infinite waiting, but API calls may fail
           setIsReady(true);
         }
@@ -157,7 +161,7 @@ export function useValuApi(): UseValuApiReturn {
           const API_READY_EVENT = (valuApiRef.current.constructor as any).API_READY || 'API_READY';
           valuApiRef.current.removeEventListener(API_READY_EVENT, apiReadyListenerRef.current);
           console.log('useValuApi: Cleaned up API_READY listener');
-        } catch (e) {
+        } catch {
           // Ignore cleanup errors
         }
         apiReadyListenerRef.current = null;
@@ -200,9 +204,9 @@ export function useValuApi(): UseValuApiReturn {
       }
 
       try {
-        // Streamlined API availability check
-        if (!valuApiRef.current.postToValuApp || typeof valuApiRef.current.postToValuApp !== 'function') {
-          console.log('useValuApi: API postToValuApp method not available, API may be disconnected');
+        // Check API connection status (from ValuSampleApp pattern)
+        if (valuApiRef.current.connected === false) {
+          console.log('useValuApi: API not connected, cannot run command');
           return null;
         }
 
@@ -219,7 +223,9 @@ export function useValuApi(): UseValuApiReturn {
           error.message?.includes('postMessage') ||
           error.message?.includes('Cannot read properties of undefined')
         ) {
-          console.log('useValuApi: Parent window lost during command execution, likely due to app navigation');
+          console.log(
+            'useValuApi: Parent window lost during command execution, likely due to app navigation'
+          );
           return null;
         }
         console.error(`useValuApi: Command failed: ${command}`, error);
@@ -250,14 +256,19 @@ export function useValuApi(): UseValuApiReturn {
 
         console.log(`useValuApi: Sending intent: ${intent.applicationId}:${intent.action}`);
         const result = await (valuApiRef.current as any).sendIntent(intent);
-        console.log(`useValuApi: Intent completed: ${intent.applicationId}:${intent.action}`, result);
+        console.log(
+          `useValuApi: Intent completed: ${intent.applicationId}:${intent.action}`,
+          result
+        );
         // Record successful operation
         valuApiSingleton.recordSuccessfulOperation();
         return result;
       } catch (error: any) {
         // Special handling for postRunResult errors
         if (error.message?.includes('postRunResult')) {
-          console.warn('useValuApi: Caught postRunResult error - app likely opened successfully anyway');
+          console.warn(
+            'useValuApi: Caught postRunResult error - app likely opened successfully anyway'
+          );
           // For app open intents, return success
           if (intent.action === 'open') {
             return { success: true, warning: 'postRunResult error ignored', intent };
@@ -266,13 +277,21 @@ export function useValuApi(): UseValuApiReturn {
         }
 
         // Check if error is related to postMessage
-        if (error.message?.includes('postMessage') || error.message?.includes('Cannot read properties of undefined')) {
-          console.log('useValuApi: Parent window lost during intent execution, likely due to app navigation');
+        if (
+          error.message?.includes('postMessage') ||
+          error.message?.includes('Cannot read properties of undefined')
+        ) {
+          console.log(
+            'useValuApi: Parent window lost during intent execution, likely due to app navigation'
+          );
           // Don't propagate the error, just return null
           return null;
         }
 
-        console.error(`useValuApi: Intent failed: ${intent.applicationId}:${intent.action}`, error.message);
+        console.error(
+          `useValuApi: Intent failed: ${intent.applicationId}:${intent.action}`,
+          error.message
+        );
         throw error;
       }
     },

@@ -25,23 +25,45 @@ console.log(`PDFs: ${result.byType[ResourceType.PDF].length}`);
 
 ## Features
 
-### Supported Resource Types
+### Supported Resource Types (21 File Types)
 
-- **PDFs**: `.pdf` files
-- **Images**: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.bmp`
-- **Documents**: `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, `.odt`, `.rtf`, `.txt`, `.csv`
+**PDFs** (1 type)
+- `.pdf` - PDF documents
+
+**Images** (8 types) - *Only when linked via `<a>` tags*
+- `.jpg`, `.jpeg` - JPEG images
+- `.png` - PNG images
+- `.gif` - GIF images
+- `.webp` - WebP images
+- `.svg` - SVG vector images
+- `.bmp` - Bitmap images
+- `.ico` - Icon files
+
+**Documents** (12 types)
+- `.doc`, `.docx` - Microsoft Word
+- `.xls`, `.xlsx` - Microsoft Excel
+- `.ppt`, `.pptx` - Microsoft PowerPoint
+- `.odt` - OpenDocument Text
+- `.ods` - OpenDocument Spreadsheet
+- `.odp` - OpenDocument Presentation
+- `.rtf` - Rich Text Format
+- `.txt` - Plain text files
+- `.csv` - Comma-separated values
 
 ### Extraction Sources
 
+> **IMPORTANT**: The parser only extracts **linked documents** from `<a href>` tags.
+> Inline images from `<img src>` tags are **NOT extracted** - they are part of the email's visual content and remain unchanged. Only downloadable resources need CMS hosting.
+
 The parser extracts resources from:
 
-1. **`<img>` tags** - `src` attribute
-2. **`<a>` tags** - `href` attribute (for PDFs and documents only)
-3. **`<embed>` tags** - `src` attribute
-4. **`<object>` tags** - `data` attribute
-5. **`<source>` tags** - `src` and `srcset` attributes
-6. **Inline styles** - `background-image: url(...)` properties
-7. **`<style>` tags** - CSS `url(...)` declarations
+1. **`<a>` tags** - `href` attribute pointing to supported file types (PDFs, documents, etc.)
+
+The parser **skips**:
+- `<img>` tags (inline images are visual content, not downloadable resources)
+- `<embed>` and `<object>` tags (embedded media)
+- CSS background images
+- Data URIs
 
 ### Features
 
