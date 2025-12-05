@@ -19,6 +19,7 @@ const customJestConfig = {
   // Module name mapper for absolute imports
   moduleNameMapper: {
     '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
+    '^@arkeytyp/valu-api$': '<rootDir>/__mocks__/@arkeytyp/valu-api.ts',
     '^@/(.*)$': '<rootDir>/$1',
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/lib/(.*)$': '<rootDir>/lib/$1',

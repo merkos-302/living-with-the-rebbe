@@ -72,3 +72,78 @@ export interface ApiSuccessResponse<T = unknown> {
  * Generic API response type
  */
 export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+/**
+ * Request body for processing newsletter
+ */
+export interface ProcessRequest {
+  html: string;
+  baseUrl?: string;
+}
+
+/**
+ * Downloaded resource with base64 encoded data
+ */
+export interface ProcessedDownload {
+  url: string;
+  data: string; // base64 encoded
+  filename: string;
+  mimeType: string;
+  size: number;
+}
+
+/**
+ * Processing error information
+ */
+export interface ProcessingError {
+  url: string;
+  error: string;
+}
+
+/**
+ * Successful response data for process endpoint
+ */
+export interface ProcessData {
+  resources: Array<{
+    url: string;
+    normalizedUrl: string;
+    type: string;
+    extension: string;
+    element: {
+      tag: string;
+      attribute: string;
+      outerHTML: string;
+    };
+    context?: {
+      altText?: string;
+      title?: string;
+      ariaLabel?: string;
+    };
+    isExternal: boolean;
+    position?: number;
+  }>;
+  downloads: ProcessedDownload[];
+  errors: ProcessingError[];
+}
+
+/**
+ * Success response for process endpoint
+ */
+export interface ProcessSuccessResponse {
+  success: true;
+  data: ProcessData;
+}
+
+/**
+ * Error response for process endpoint
+ */
+export interface ProcessErrorResponse {
+  success: false;
+  error: string;
+  details?: string;
+}
+
+/**
+ * Combined response type for process endpoint
+ */
+export type ProcessResponse = ProcessSuccessResponse | ProcessErrorResponse;

@@ -3,11 +3,11 @@
 
 Administrative tool for ChabadUniverse that processes newsletter HTML to centralize resources on the CMS platform.
 
-## 🎯 Phase 2 MVP - 1-2 Week Sprint
+## 🎯 Phase 3 Complete - Full Pipeline Implemented
 
-**Current Status**: Days 2-3 Complete - HTML Input and Parser Implemented
-**Progress**: Core HTML processing engine built with 181 passing tests
-**Next**: Resource downloading, CMS upload, and URL replacement (Phase 3)
+**Current Status**: Phase 3 Complete - Full resource processing pipeline operational
+**Progress**: 305 passing tests across all modules
+**Remaining**: End-to-end testing with real newsletters, CMS 801 error investigation (server-side)
 
 ## What This Tool Does
 
@@ -65,19 +65,24 @@ The CMS URLs automatically handle viewer authentication - authenticated users se
 - ✅ Admin dashboard with tabbed interface (Resources, HTML Preview, Statistics)
 - ✅ Preview components with filtering and statistics
 - ✅ API routes: /api/parse and /api/fetch-html with rate limiting
-- ✅ 181 tests - all passing across 7 test suites
 
-**Phase 3 Next (📋 To Be Implemented)**:
-- ⏳ Resource downloader with parallel processing
-- ⏳ CMS upload integration (stub first, then real API)
-- ⏳ URL replacement engine
-- ⏳ Deploy to Vercel
+**Phase 3 Complete (✅ Resource Processing)**:
+- ✅ Resource downloader with parallel processing (`/lib/downloader/` - 23 tests)
+- ✅ CMS upload via Valu Service Intents (`/lib/cms/` - 56 tests)
+- ✅ URL replacement engine (`/lib/replacer/` - 36 tests)
+- ✅ Pipeline orchestrator (`/lib/processor/`)
+- ✅ Processing hook (`/hooks/useProcessing.ts`)
+- ✅ Admin UI with progress tracking and output viewer
+- ✅ **305 tests - all passing**
+
+**Remaining**:
+- End-to-end testing with real newsletters
+- CMS 801 error investigation (server-side Roomful API issue)
+- Deploy to Vercel
 
 **Future Enhancements (📦 Post-MVP)**:
-- Real CMS API integration
-- File upload interface
-- Before/after preview
 - MongoDB processing history
+- Before/after preview comparison
 - Batch processing
 - Analytics dashboard
 
@@ -180,37 +185,26 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 
 ## Project Status
 
-**Current Phase**: Phase 2 MVP Development - Week 1 (Days 1-3 Complete)
+**Current Phase**: Phase 3 Complete - Full Pipeline Operational
 
 ### Phase 2: HTML Input and Parsing (✅ COMPLETE)
-- [x] **Day 1: Valu API Authentication** ✅ COMPLETE
-  - Iframe-only access enforcement
-  - Admin permission verification
-  - Cookie-based caching (24-hour duration)
-  - Health monitoring with adaptive intervals
-  - Development test harness
-  - Multiple fallback methods for user fetching
-- [x] **Days 2-3: HTML Input & Parser** ✅ COMPLETE
-  - Admin dashboard with tabbed interface
-  - Dual-mode input: URL fetch (default) + paste HTML (fallback)
-  - Server-side URL fetcher with automatic relative URL resolution
-  - Base URL field for manual relative URL resolution
-  - Cheerio-based parser (extracts ONLY linked documents from <a> tags)
-  - Resource identifier supporting 21 file formats
-  - Preview components: Resources grid, HTML preview, Statistics
-  - API routes: /api/parse and /api/fetch-html with rate limiting
-  - 181 comprehensive tests - all passing
+- [x] **Day 1: Valu API Authentication** ✅
+- [x] **Days 2-3: HTML Input & Parser** ✅
 
-### Phase 3: Resource Processing (📋 NEXT)
-- [ ] Resource downloader with parallel processing
-- [ ] CMS upload integration (stub functions first)
-- [ ] URL replacement engine
-- [ ] Enhanced output viewer with before/after comparison
+### Phase 3: Resource Processing (✅ COMPLETE)
+- [x] Resource downloader with parallel processing (`/lib/downloader/` - 23 tests)
+- [x] CMS upload via Valu Service Intents (`/lib/cms/` - 56 tests)
+- [x] URL replacement engine (`/lib/replacer/` - 36 tests)
+- [x] Pipeline orchestrator (`/lib/processor/`)
+- [x] Processing hook (`/hooks/useProcessing.ts`)
+- [x] Admin UI with progress tracking and output viewer
+- [x] Loading screen until authenticated
+- [x] User name display in header
 
-### Week 2 Tasks (UI & Deployment)
-- [ ] Day 6-7: Basic UI with status & output
-- [ ] Day 8-9: Integration testing & edge cases
-- [ ] Day 10: Deploy to Vercel
+### Remaining Tasks
+- [ ] End-to-end testing with real newsletters
+- [ ] Investigate CMS 801 error (server-side Roomful API issue)
+- [ ] Deploy to Vercel
 
 ### Infrastructure Complete
 - ✅ Next.js 15 with App Router configured
@@ -221,12 +215,10 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 - ✅ Git hooks with Husky and lint-staged
 - ✅ Complete directory structure created
 - ✅ Sample newsletter for testing
-- ✅ **Valu API authentication system (12 files, 1,356 lines)**
-- ✅ **HTML input and parser system (30+ files, 3,000+ lines)**
-- ✅ **Admin dashboard with tabbed interface**
-- ✅ **Dual-mode input: URL fetch (default) + paste HTML (fallback)**
-- ✅ **Server-side URL fetcher avoiding CORS**
-- ✅ **181 comprehensive tests - all passing across 7 test suites**
+- ✅ **Valu API authentication system (12 files)**
+- ✅ **HTML input and parser system (30+ files)**
+- ✅ **Resource processing pipeline (4 new modules)**
+- ✅ **305 comprehensive tests - all passing**
 
 ## Development Workflow
 

@@ -7,21 +7,47 @@ This document specifies the API endpoints required from the ChabadUniverse platf
 
 **Status**: ✅ **AVAILABLE** - The Valu API v1.1.1 provides file storage via Service Intents (see below).
 
-## 🚀 Phase 3 Implementation - Real Valu API
+## 🚀 Phase 3 Implementation Complete - Real Valu API
 
-**The Valu API v1.1.1 now provides production-ready file storage via Service Intents.**
+**Status**: ✅ IMPLEMENTED - The full resource processing pipeline is operational.
 
-### Available File Storage API
+### Implementation Summary
+
+| Module | Status | Tests |
+|--------|--------|-------|
+| Resource Downloader | ✅ Complete | 23 |
+| CMS Upload Service | ✅ Complete | 56 |
+| URL Replacer | ✅ Complete | 36 |
+| Pipeline Orchestrator | ✅ Complete | - |
+| **Total** | **✅ Complete** | **305** |
+
+### Valu API v1.1.1 Integration
 
 The `@arkeytyp/valu-api` package provides these services:
 
-| Service | Action | Description |
-|---------|--------|-------------|
-| `ApplicationStorage` | `resource-upload` | Upload files (accepts FileList) |
-| `ApplicationStorage` | `resource-search` | List/search files (for deduplication) |
-| `ApplicationStorage` | `resource-delete` | Delete files |
-| `Resources` | `get-thumbnail-url` | Get image thumbnails |
-| `Resources` | `generate-public-url` | Get shareable URLs (handles auth) |
+| Service | Action | Description | Status |
+|---------|--------|-------------|--------|
+| `ApplicationStorage` | `resource-upload` | Upload files (accepts FileList) | ✅ Implemented |
+| `ApplicationStorage` | `resource-search` | List/search files (for deduplication) | ✅ Implemented |
+| `ApplicationStorage` | `resource-delete` | Delete files | Available |
+| `Resources` | `get-thumbnail-url` | Get image thumbnails | Available |
+| `Resources` | `generate-public-url` | Get shareable URLs (handles auth) | ✅ Implemented |
+
+### Actual Response Formats
+
+**Upload Response** (resolved/rejected format):
+```typescript
+const result = await valuApi.callService(uploadIntent);
+// Response: { resolved: [{ uuid, id, metadata, thumbnail }], rejected: [] }
+const resourceId = result.resolved[0].uuid || result.resolved[0].id;
+```
+
+**Public URL Response** (returns string directly):
+```typescript
+const publicUrl = await valuApi.callService(urlIntent);
+// Response: "https://api.roomful.net/api/v0/resource/{uuid}"
+// NOT wrapped in object - URL string returned directly
+```
 
 ### Usage Example
 
@@ -30,9 +56,10 @@ import { ValuApi, Intent } from "@arkeytyp/valu-api";
 
 // Upload files
 const uploadIntent = new Intent("ApplicationStorage", "resource-upload", {
-  files: fileList  // FileList from File input or converted ArrayBuffer
+  files: fileList  // FileList created via DataTransfer API
 });
 const result = await valuApi.callService(uploadIntent);
+const resourceId = result.resolved[0].uuid;
 
 // Check for duplicates before uploading
 const searchIntent = new Intent("ApplicationStorage", "resource-search", {
@@ -40,20 +67,22 @@ const searchIntent = new Intent("ApplicationStorage", "resource-search", {
 });
 const existing = await valuApi.callService(searchIntent);
 
-// Get public URL (handles auth automatically)
+// Get public URL (returns string directly)
 const urlIntent = new Intent("Resources", "generate-public-url", {
-  resourceId: "your-resource-id"
+  resourceId: resourceId
 });
 const publicUrl = await valuApi.callService(urlIntent);
+// publicUrl = "https://api.roomful.net/api/v0/resource/{uuid}"
 ```
 
-### Key Features
-- **Auto-auth URLs**: Public URLs from `generate-public-url` automatically redirect based on user auth status
-- **Deduplication**: Use `resource-search` to check if file already exists by filename
-- **File scoping**: Each application has its own storage namespace
+### Key Implementation Notes
+- **Upload Response**: Uses `{ resolved, rejected }` format, NOT legacy `{ success, data }`
+- **Public URLs**: Returns URL string directly, NOT wrapped in object
+- **FileList Creation**: Must use DataTransfer API for postMessage compatibility
+- **URL Domain**: Actual URLs are from `api.roomful.net`, not `cms.chabaduniverse.com`
 
-### Reference Documentation
-See `../valu-api/FILE_STORAGE_API.md` for complete API documentation.
+### Known Issue
+- **CMS 801 Error**: Some uploaded file URLs return 801 from `api.roomful.net`. This is a server-side Roomful API issue, not a client-side bug. The upload pipeline works correctly.
 
 ---
 

@@ -29,6 +29,29 @@ if (typeof global.MessagePort === 'undefined') {
   global.MessageChannel = MessageChannel;
 }
 
+// Mock Next.js Request/Response for API route tests
+if (typeof global.Request === 'undefined') {
+  global.Request = class Request {
+    constructor(input, init) {
+      this.url = typeof input === 'string' ? input : input.url;
+      this.method = init?.method || 'GET';
+      this.headers = new Map(Object.entries(init?.headers || {}));
+      this.body = init?.body;
+    }
+  };
+}
+
+if (typeof global.Response === 'undefined') {
+  global.Response = class Response {
+    constructor(body, init) {
+      this.body = body;
+      this.status = init?.status || 200;
+      this.statusText = init?.statusText || '';
+      this.headers = new Map(Object.entries(init?.headers || {}));
+    }
+  };
+}
+
 // Mock environment variables for tests
 process.env.NEXT_PUBLIC_CHABAD_UNIVERSE_URL = 'https://chabaduniverse.com';
 process.env.CHABAD_UNIVERSE_API_KEY = 'test-api-key';
