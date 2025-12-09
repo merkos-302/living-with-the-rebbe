@@ -81,8 +81,8 @@ const publicUrl = await valuApi.callService(urlIntent);
 - **FileList Creation**: Must use DataTransfer API for postMessage compatibility
 - **URL Domain**: Actual URLs are from `api.roomful.net`, not `cms.chabaduniverse.com`
 
-### Known Issue
-- **CMS 801 Error**: Some uploaded file URLs return 801 from `api.roomful.net`. This is a server-side Roomful API issue, not a client-side bug. The upload pipeline works correctly.
+### Resolved Issue (2025-12-09)
+- **CMS 801 Error**: Was caused by using `uuid` instead of `id` from upload response. The `generate-public-url` API expects the same ID format returned by `resource-search`. Also added 1-second delay after upload to allow server processing. See session file `2025-12-09-fix-cms-801-public-url-error.md` for details.
 
 ---
 

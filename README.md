@@ -7,7 +7,7 @@ Administrative tool for ChabadUniverse that processes newsletter HTML to central
 
 **Current Status**: Phase 3 Complete - Full resource processing pipeline operational
 **Progress**: 305 passing tests across all modules
-**Remaining**: End-to-end testing with real newsletters, CMS 801 error investigation (server-side)
+**Remaining**: End-to-end testing with real newsletters, deploy to Vercel
 
 ## What This Tool Does
 
@@ -77,7 +77,6 @@ The CMS URLs automatically handle viewer authentication - authenticated users se
 
 **Remaining**:
 - End-to-end testing with real newsletters
-- CMS 801 error investigation (server-side Roomful API issue)
 - Deploy to Vercel
 
 **Future Enhancements (📦 Post-MVP)**:
@@ -203,7 +202,7 @@ MONGODB_URI=mongodb://localhost:27017/living-with-rebbe
 
 ### Remaining Tasks
 - [ ] End-to-end testing with real newsletters
-- [ ] Investigate CMS 801 error (server-side Roomful API issue)
+- [x] ~~Investigate CMS 801 error~~ - Fixed! Was using wrong resource ID format
 - [ ] Deploy to Vercel
 
 ### Infrastructure Complete

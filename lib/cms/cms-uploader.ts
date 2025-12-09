@@ -143,16 +143,24 @@ export async function uploadToCMS(
         }
 
         // Successfully got a resolved resource
-        const resourceId = resolvedResource.uuid || resolvedResource.id;
+        // IMPORTANT: Use `id` not `uuid` - the `generate-public-url` API expects
+        // the same ID format returned by `resource-search`, which is `id`.
+        // Using `uuid` causes 801 errors from the Roomful API.
+        const resourceId = resolvedResource.id;
         const metadata = resolvedResource.metadata || {};
 
         logger.info('File uploaded successfully', {
           resourceId,
+          uuid: resolvedResource.uuid, // Log both for debugging
           filename: metadata.fileName || download.filename,
           size: metadata.fileSize || download.size,
           attempt,
           duration: Date.now() - startTime,
         });
+
+        // Wait for the server to finish processing the upload before generating URL
+        // The Valu API documentation warns that files may still be processing after upload
+        await sleep(1000);
 
         // Generate public URL using the resource ID
         const publicUrl = await generatePublicUrl(valuApi, resourceId);

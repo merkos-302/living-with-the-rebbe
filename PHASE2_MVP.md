@@ -560,8 +560,8 @@ NEXT_PUBLIC_CHABAD_UNIVERSE_URL=https://chabaduniverse.com
 # MongoDB not yet implemented
 ```
 
-### Known Issues:
-- **CMS 801 Error** - Uploaded file URLs return 801 from Roomful API. This is a server-side CMS issue, not client-side.
+### Resolved Issues:
+- **CMS 801 Error** - Fixed (2025-12-09). Was using wrong resource ID format (`uuid` instead of `id`). See session file for details.
 
 ## Success Metrics
 

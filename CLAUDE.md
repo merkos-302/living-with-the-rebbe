@@ -326,11 +326,8 @@ All Phase 3 components have been implemented:
 
 ### Remaining Tasks
 - [ ] End-to-end testing with real newsletters
-- [ ] Investigate CMS 801 error (server-side Roomful API issue)
+- [x] ~~Investigate CMS 801 error~~ - Fixed! Was using wrong resource ID format (see session file `2025-12-09-fix-cms-801-public-url-error.md`)
 - [ ] Deploy to Vercel
-
-### Known Issues
-- **CMS 801 Error**: Uploaded file URLs return 801 from `api.roomful.net`. This is a server-side CMS issue, not a client-side bug. The upload pipeline works correctly.
 
 ### Out of Scope (Post-MVP)
 - MongoDB processing history
@@ -395,7 +392,7 @@ All Phase 3 components have been implemented:
 
 ### 🎯 Remaining Tasks
 - [ ] End-to-end testing with real newsletters
-- [ ] Investigate CMS 801 error (server-side Roomful API issue)
+- [x] ~~Investigate CMS 801 error~~ - Fixed! Was using wrong resource ID format
 - [ ] Deploy to Vercel
 
 ### 📦 Future Enhancements (Post-MVP)
